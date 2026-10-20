@@ -149,6 +149,21 @@
   );
 
   console.log("Longhorn Athletics connected to Supabase");
+  
+async function testSportsConnection() {
+  const { data, error } = await longhornDB
+    .from("sports")
+    .select("*");
+
+  if (error) {
+    console.error("Sports database error:", error.message);
+  } else {
+    console.log("Longhorn sports loaded:", data);
+  }
+}
+
+testSportsConnection();
+
 </script>
 
 </body>
