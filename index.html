@@ -172,16 +172,22 @@ async function displaySports() {
 
   sportsList.replaceChildren();
 
-  data.forEach((sport) => {
-    const card = document.createElement("div");
-    card.className = "card";
+ 
+data.forEach((sport) => {
+  const card = document.createElement("a");
+  card.className = "card";
+  card.href = "sport.html?id=" + encodeURIComponent(sport.id);
+  card.style.display = "block";
+  card.style.textDecoration = "none";
+  card.style.color = "inherit";
 
-    const heading = document.createElement("h3");
-    heading.textContent = sport.name;
+  const heading = document.createElement("h3");
+  heading.textContent = sport.name;
 
-    card.appendChild(heading);
-    sportsList.appendChild(card);
-  });
+  card.appendChild(heading);
+  sportsList.appendChild(card);
+});
+
 }
 
 displaySports();
