@@ -100,20 +100,11 @@
   <main>
     <section id="sports">
       <h2>Our Sports</h2>
-      <div class="grid">
-        <div class="card"><h3>Fall Sports</h3>
-          <p>Football, Volleyball, Soccer, Cross Country,
-          Girls Golf and Cheer</p>
-        </div>
-        <div class="card"><h3>Winter Sports</h3>
-          <p>Boys Basketball, Girls Basketball,
-          Wrestling and Cheer</p>
-        </div>
-        <div class="card"><h3>Spring Sports</h3>
-          <p>Baseball, Softball, Track & Field
-          and Boys Golf</p>
-        </div>
-      </div>
+     
+<div class="grid" id="sports-list">
+  <div class="card">Loading Longhorn sports...</div>
+</div>
+
     </section>
 
     <section id="updates">
@@ -164,6 +155,37 @@ async function testSportsConnection() {
 
 testSportsConnection();
 
+
+async function displaySports() {
+  const sportsList = document.getElementById("sports-list");
+
+  const { data, error } = await longhornDB
+    .from("sports")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    sportsList.textContent = "Unable to load sports right now.";
+    console.error("Sports loading error:", error.message);
+    return;
+  }
+
+  sportsList.replaceChildren();
+
+  data.forEach((sport) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const heading = document.createElement("h3");
+    heading.textContent = sport.name;
+
+    card.appendChild(heading);
+    sportsList.appendChild(card);
+  });
+}
+
+displaySports();
+  
 </script>
 
 </body>
