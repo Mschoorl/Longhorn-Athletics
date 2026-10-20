@@ -138,5 +138,18 @@
   <footer>
     Longhorn Athletics | Battle Mountain High School
   </footer>
+
+<script>
+  const SUPABASE_URL = "https://zwbjethanfvgqknngcii.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_k7rAGIWYj_t_BmDfbwp42w_Yj375UCa";
+
+  const longhornDB = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  console.log("Longhorn Athletics connected to Supabase");
+</script>
+
 </body>
 </html>
