@@ -107,23 +107,14 @@
 
     </section>
 
-    <section id="updates">
-      <h2>Schedules & Scores</h2>
-      <div class="card">
-        <h3>Coming Soon</h3>
-        <p>Game schedules, final scores, and team results
-        will appear here once connected to our database.</p>
-      </div>
-    </section>
+  
 
-    <section id="about" class="notice">
-      <h2>Welcome to Longhorn Country!</h2>
-      <p>Follow Battle Mountain High School athletics,
-      support our student-athletes, and celebrate
-      Longhorn Pride!</p>
-      <p><strong>Development preview:</strong>
-      Coach and Athletic Director logins are not active yet.</p>
-    </section>
+ <section id="updates">
+  <h2>Schedules & Scores</h2>
+  <div class="grid" id="games-list">
+    <div class="card">Loading Longhorn games...</div>
+  </div>
+</section>  
   </main>
 
   <footer>
@@ -191,7 +182,58 @@ data.forEach((sport) => {
 }
 
 displaySports();
-  
+async function displayGames() {
+  const gamesList = document.getElementById("games-list");
+
+  const { data, error } = await longhornDB
+    .from("games")
+    .select("opponent, game_date, location, home_away, status, bm_score, opponent_score, teams(name)")
+    .order("game_date", { ascending: false });
+
+  if (error) {
+    gamesList.textContent = "Unable to load games right now.";
+    console.error("Games loading error:", error.message);
+    return;
+  }
+
+  gamesList.replaceChildren();
+
+  if (!data.length) {
+    gamesList.textContent = "No games posted yet.";
+    return;
+  }
+
+  data.forEach((game) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const heading = document.createElement("h3");
+    heading.textContent =
+      (game.teams?.name || "Longhorns") + " vs. " + game.opponent;
+
+    const details = document.createElement("p");
+    const date = new Date(game.game_date).toLocaleDateString();
+    details.textContent =
+      date + " • " + game.home_away + " • " + game.location;
+
+    const result = document.createElement("p");
+
+    if (game.status === "Completed") {
+      result.textContent =
+        "FINAL: BM " + game.bm_score +
+        " - " + game.opponent_score + " " + game.opponent;
+    } else {
+      result.textContent = game.status;
+    }
+
+    card.appendChild(heading);
+    card.appendChild(details);
+    card.appendChild(result);
+    gamesList.appendChild(card);
+  });
+}
+
+displayGames();  
 </script>
 
 </body>
