@@ -85,7 +85,7 @@
   <main>
   
 <div class="card">
-  <h2>Schedule & Scores</h2>
+<div id="sport-games">Loading schedule...</div>
   <div id="sport-games">
     Loading Longhorn games...
   </div>
@@ -145,6 +145,45 @@
       document.title = data.name + " | Longhorn Athletics";
     }
 
+async function loadSportGames() {
+  const params = new URLSearchParams(window.location.search);
+  const sportId = params.get("id");
+  const gamesList = document.getElementById("sport-games");
+
+  if (!gamesList || !sportId) return;
+
+  const { data, error } = await db
+    .from("games")
+    .select("opponent, game_date, location, home_away, status, bm_score, opponent_score, teams!inner(name, sport_id)")
+    .eq("teams.sport_id", sportId)
+    .order("game_date", { ascending: false });
+
+  if (error) {
+    gamesList.textContent = "Unable to load schedule.";
+    console.error("Sport games error:", error.message);
+    return;
+  }
+
+  gamesList.replaceChildren();
+
+  if (!data.length) {
+    gamesList.textContent = "No games posted yet.";
+    return;
+  }
+
+  data.forEach(game => {
+    const entry = document.createElement("p");
+    const date = new Date(game.game_date).toLocaleDateString();
+
+    const score = game.status === "Completed"
+      ? `FINAL: BM ${game.bm_score} - ${game.opponent_score} ${game.opponent}`
+      : game.status;
+
+    entry.textContent = `${date} • ${game.home_away} vs. ${game.opponent} • ${score}`;
+    gamesList.appendChild(entry);
+  });
+}
+loadSportGames();
     loadSport();
   </script>
 </body>
