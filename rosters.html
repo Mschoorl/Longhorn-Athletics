@@ -459,6 +459,24 @@ await loadRoster(document.getElementById("teamSelect").value);
 
 entry.appendChild(editButton);
 
+const removeButton = document.createElement("button");
+removeButton.type = "button";
+removeButton.textContent = "Remove Player";
+
+removeButton.style.marginLeft = "8px";
+removeButton.style.padding = "6px 12px";
+removeButton.style.backgroundColor = "#8b1e1e";
+removeButton.style.color = "white";
+removeButton.style.border = "none";
+removeButton.style.borderRadius = "5px";
+removeButton.style.cursor = "pointer";
+
+removeButton.addEventListener("click", () => {
+  alert("Remove Player selected for " + name);
+});
+
+entry.appendChild(removeButton);
+
     rosterList.appendChild(entry);
   });
 }
