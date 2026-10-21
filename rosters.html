@@ -286,10 +286,14 @@ async function loadRoster(teamId) {
       id,
       jersey_number,
       position,
-      athletes (
-        first_name,
-        last_name,
-        graduation_year
+
+athletes (
+  id,
+  first_name,
+  last_name,
+  graduation_year
+)
+
       )
     `)
     .eq("team_id", teamId)
