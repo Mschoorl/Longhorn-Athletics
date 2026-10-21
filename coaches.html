@@ -334,7 +334,10 @@ db.rpc("get_approved_coaches"),
 
     coaches.forEach(coach => {
       coachSelect.appendChild(
-        makeOption(coach.user_id, coach.user_id)
+makeOption(
+  coach.user_id,
+  coach.full_name + " (" + coach.email + ")"
+)
       );
     });
 
@@ -356,7 +359,11 @@ db.rpc("get_approved_coaches"),
       entry.className = "entry";
 
       const name = document.createElement("p");
-      name.textContent = coach.user_id;
+
+name.textContent =
+  coach.full_name + " (" + coach.email + ")";
+name.style.fontWeight = "bold";
+
 
       const button = document.createElement("button");
       button.className = "danger";
