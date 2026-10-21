@@ -167,7 +167,8 @@
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
 
-        const { error } = await db.auth.signInWithPassword({
+        const { data, error } = await db.auth.signInWithPassword({
+
           email,
           password
         });
