@@ -352,6 +352,18 @@ editButton.addEventListener("click", async () => {
   );
   if (newGraduationYear === null) return;
 
+const newJerseyNumber = prompt(
+  "Jersey Number:",
+  player.jersey_number ?? ""
+);
+if (newJerseyNumber === null) return;
+
+const newPosition = prompt(
+  "Position:",
+  player.position ?? ""
+);
+if (newPosition === null) return;
+
   
 const firstName = newFirstName.trim();
 const lastName = newLastName.trim();
