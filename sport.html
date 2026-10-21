@@ -189,7 +189,101 @@ async function loadSportGames() {
   });
 }
 loadSportGames();
-    loadSport();
+
+async function displayFootballRosters() {
+    const params = new URLSearchParams(window.location.search);
+    const sportId = params.get("id");
+
+    // Football is sport ID 1
+    if (sportId !== "1") return;
+
+    const { data, error } = await db
+        .from("team_rosters")
+        .select(`
+            team_id,
+            jersey_number,
+            position,
+            athletes(first_name, last_name)
+        `)
+        .in("team_id", [1, 15])
+        .order("jersey_number");
+
+    const varsityDiv = document.getElementById("varsity-roster");
+    const jvDiv = document.getElementById("jv-roster");
+
+    if (!varsityDiv || !jvDiv) return;
+
+    if (error) {
+        console.error("Roster loading error:", error.message);
+        varsityDiv.textContent = "Unable to load roster.";
+        jvDiv.textContent = "Unable to load roster.";
+        return;
+    }
+
+    function renderRoster(container, teamId) {
+        const players = (data || [])
+            .filter(player => player.team_id === teamId)
+            .sort((a, b) =>
+                Number(a.jersey_number) - Number(b.jersey_number)
+            );
+
+        container.replaceChildren();
+
+        if (!players.length) {
+            container.textContent = "No players listed yet.";
+            return;
+        }
+
+        const table = document.createElement("table");
+        table.style.width = "100%";
+        table.style.borderCollapse = "collapse";
+
+        const header = document.createElement("tr");
+
+        ["#", "Player", "Position"].forEach(label => {
+            const th = document.createElement("th");
+            th.textContent = label;
+            th.style.textAlign = "left";
+            th.style.padding = "10px";
+            th.style.borderBottom = "2px solid #e5b93f";
+            header.appendChild(th);
+        });
+
+        table.appendChild(header);
+
+        players.forEach(player => {
+            const row = document.createElement("tr");
+
+            const values = [
+                player.jersey_number || "",
+                player.athletes
+                    ? player.athletes.first_name + " " +
+                      player.athletes.last_name
+                    : "Unknown Player",
+                player.position || ""
+            ];
+
+            values.forEach(value => {
+                const td = document.createElement("td");
+                td.textContent = value;
+                td.style.padding = "10px";
+                td.style.borderBottom = "1px solid #ddd";
+                row.appendChild(td);
+            });
+
+            table.appendChild(row);
+        });
+
+        container.appendChild(table);
+    }
+
+    renderRoster(varsityDiv, 1);
+    renderRoster(jvDiv, 15);
+}
+
+loadSport();
+displayFootballRosters();
+
   </script>
 </body>
 </html>
