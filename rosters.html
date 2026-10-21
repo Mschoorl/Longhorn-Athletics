@@ -182,11 +182,74 @@ async function loadTeams() {
   });
 }
 
+async function loadRoster(teamId) {
+  const rosterList = document.getElementById("rosterList");
+
+  if (!teamId) {
+    rosterList.textContent = "Select a team to view its roster.";
+    return;
+  }
+
+  rosterList.textContent = "Loading roster...";
+
+  const { data, error } = await db
+    .from("team_rosters")
+    .select(`
+      id,
+      jersey_number,
+      position,
+      athletes (
+        first_name,
+        last_name,
+        graduation_year
+      )
+    `)
+    .eq("team_id", teamId)
+    .order("jersey_number");
+
+  if (error) {
+    rosterList.textContent =
+      "Unable to load roster: " + error.message;
+    return;
+  }
+
+  rosterList.replaceChildren();
+
+  if (!data || data.length === 0) {
+    rosterList.textContent = "No athletes on this roster yet.";
+    return;
+  }
+
+  data.forEach(player => {
+    const athlete = player.athletes;
+    const entry = document.createElement("p");
+
+    const name = athlete
+      ? athlete.first_name + " " + athlete.last_name
+      : "Unknown Athlete";
+
+    entry.textContent =
+      "#" + (player.jersey_number || "—") +
+      " — " + name +
+      " | Position: " + (player.position || "—") +
+      " | Class of " +
+      (athlete?.graduation_year || "—");
+
+    rosterList.appendChild(entry);
+  });
+}
+
+
 async function initialize() {
   const authorized = await checkAccess();
 
   if (authorized) {
     await loadTeams();
+
+    document.getElementById("teamSelect")
+      .addEventListener("change", async function () {
+        await loadRoster(this.value);
+      });
   }
 }
 
