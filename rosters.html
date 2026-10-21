@@ -409,6 +409,27 @@ if (error || !updatedAthlete) {
   return;
 }
 
+const jerseyNumber = newJerseyNumber.trim();
+const position = newPosition.trim();
+
+const { error: rosterError } = await db
+  .from("team_rosters")
+  .update({
+    jersey_number: jerseyNumber || null,
+    position: position || null
+  })
+  .eq("id", player.id)
+  .select("id")
+  .single();
+
+if (rosterError) {
+  alert(
+    "Athlete name/year saved, but jersey/position failed: " +
+    rosterError.message
+  );
+  return;
+}
+
 alert("Athlete information saved successfully!");
 await loadRoster(document.getElementById("teamSelect").value);
 
