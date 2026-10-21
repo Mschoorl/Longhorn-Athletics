@@ -103,5 +103,59 @@
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<script>
+  const SUPABASE_URL =
+    "https://zwbjethanfvgqknngcii.supabase.co";
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_k7rAGIWYj_t_BmDfbwp42w_Yj375UCa";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  const statusEl = document.getElementById("status");
+  const dashboard = document.getElementById("dashboard");
+
+  // Hide roster management until access is verified.
+  dashboard.classList.add("hidden");
+  statusEl.textContent = "Verifying administrator access...";
+
+  async function checkAccess() {
+    const { data, error } = await db.auth.getUser();
+
+    if (error || !data.user) {
+      window.location.replace("login.html");
+      return false;
+    }
+
+    const { data: staff, error: roleError } = await db
+      .from("staff_roles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .eq("role", "super_admin")
+      .maybeSingle();
+
+    if (roleError || !staff) {
+      statusEl.textContent =
+        "Access denied. Super Admin access required.";
+      return false;
+    }
+
+    dashboard.classList.remove("hidden");
+    statusEl.textContent = "Super Admin access verified.";
+    return true;
+  }
+
+  async function initialize() {
+    await checkAccess();
+  }
+
+  initialize();
+</script>
+
 </body>
 </html>
