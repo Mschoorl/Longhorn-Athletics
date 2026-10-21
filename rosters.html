@@ -339,7 +339,7 @@ editButton.style.borderRadius = "6px";
 editButton.style.cursor = "pointer";
 
 
-editButton.addEventListener("click", () => {
+editButton.addEventListener("click", async () => {
   const newFirstName = prompt("First Name:", athlete.first_name);
   if (newFirstName === null) return;
 
@@ -352,11 +352,54 @@ editButton.addEventListener("click", () => {
   );
   if (newGraduationYear === null) return;
 
-  alert(
-    "Updated information entered for " +
-    newFirstName + " " + newLastName +
-    ". Saving to the database is our next step!"
-  );
+  
+const firstName = newFirstName.trim();
+const lastName = newLastName.trim();
+const graduationYear = Number(newGraduationYear);
+
+if (
+  !firstName ||
+  !lastName ||
+  !Number.isInteger(graduationYear) ||
+  graduationYear < 2000 ||
+  graduationYear > 2100
+) {
+  alert("Please enter a valid name and graduation year.");
+  return;
+}
+
+if (!athlete.id) {
+  alert("Unable to identify this athlete. No changes saved.");
+  return;
+}
+
+if (!confirm(
+  "Save changes for " + name + "?\n\n" +
+  "New name: " + firstName + " " + lastName + "\n" +
+  "Graduation year: " + graduationYear
+)) {
+  return;
+}
+
+const { data: updatedAthlete, error } = await db
+  .from("athletes")
+  .update({
+    first_name: firstName,
+    last_name: lastName,
+    graduation_year: graduationYear
+  })
+  .eq("id", athlete.id)
+  .select("id")
+  .single();
+
+if (error || !updatedAthlete) {
+  alert("Unable to save changes: " + (error?.message || "No athlete updated."));
+  return;
+}
+
+alert("Athlete information saved successfully!");
+await loadRoster(document.getElementById("teamSelect").value);
+
 });
 
 
