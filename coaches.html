@@ -1,1 +1,405 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coach Management | Longhorn Athletics</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7f4;
+      color: #173b28;
+    }
+    header {
+      background: #155734;
+      color: white;
+      padding: 24px;
+      text-align: center;
+      border-bottom: 5px solid #d9b34a;
+    }
+    main {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 18px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dce5dd;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    button, .button {
+      background: #155734;
+      color: white;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .secondary { background: #596b61; }
+    .danger { background: #a32c2c; }
+    input, select {
+      box-sizing: border-box;
+      padding: 11px;
+      width: 100%;
+      margin: 8px 0 14px;
+      border: 1px solid #c9d5ca;
+      border-radius: 6px;
+    }
+    label { font-weight: bold; }
+    .hidden { display: none; }
+    .entry {
+      border-top: 1px solid #ddd;
+      padding: 14px 0;
+    }
+    .status { margin: 15px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🐂 Longhorn Athletics</h1>
+  <p>Coach Management — Super Admin</p>
+</header>
+
+<main>
+  <p>
+    <a class="button secondary" href="admin.html">
+      ← Back to Dashboard
+    </a>
+  </p>
+
+  <p id="status" class="status">Verifying administrator access...</p>
+
+  <div id="dashboard" class="hidden">
+
+    <section class="card">
+      <h2>Approve a Coach</h2>
+      <p>
+        Enter the coach's Supabase account ID.
+        The coach must first have a registered account.
+      </p>
+
+      <form id="approveForm">
+        <label for="coachId">Coach User ID (UUID)</label>
+        <input id="coachId" type="text" required
+          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        <button type="submit">Approve Coach</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Assign a Coach to a Team</h2>
+      <form id="assignForm">
+        <label for="approvedCoach">Approved Coach</label>
+        <select id="approvedCoach" required></select>
+
+        <label for="team">Team</label>
+        <select id="team" required></select>
+
+        <button type="submit">Assign Team</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Approved Coaches</h2>
+      <div id="coachList">Loading...</div>
+    </section>
+
+    <section class="card">
+      <h2>Current Team Assignments</h2>
+      <div id="assignmentList">Loading...</div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+  const SUPABASE_URL =
+    "https://zwbjethanfvgqknngcii.supabase.co";
+
+  const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_k7rAGIhYj_t_BmDfbwp42w_Yj375UCa";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  const statusEl = document.getElementById("status");
+  const dashboard = document.getElementById("dashboard");
+
+  let coaches = [];
+  let teams = [];
+  let assignments = [];
+
+  function showStatus(message) {
+    statusEl.textContent = message;
+  }
+
+  function makeOption(value, label) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    return option;
+  }
+
+  async function checkAccess() {
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getUser();
+
+    if (sessionError || !sessionData.user) {
+      window.location.replace("login.html");
+      return false;
+    }
+
+    const { data, error } = await db
+      .from("staff_roles")
+      .select("role")
+      .eq("user_id", sessionData.user.id)
+      .eq("role", "super_admin")
+      .maybeSingle();
+
+    if (error || !data) {
+      showStatus("Access denied. Super Admin access required.");
+      return false;
+    }
+
+    dashboard.classList.remove("hidden");
+    showStatus("Super Admin access verified.");
+    return true;
+  }
+
+  async function loadData() {
+    const [coachResult, teamResult, assignmentResult] =
+      await Promise.all([
+        db.from("staff_roles")
+          .select("user_id, role")
+          .eq("role", "coach"),
+
+        db.from("teams")
+          .select("*")
+          .order("id"),
+
+        db.from("coach_assignments")
+          .select("id, user_id, team_id")
+          .order("id")
+      ]);
+
+    const errors = [
+      coachResult.error,
+      teamResult.error,
+      assignmentResult.error
+    ].filter(Boolean);
+
+    if (errors.length) {
+      showStatus(
+        "Unable to load data: " +
+        errors.map(e => e.message).join("; ")
+      );
+      return;
+    }
+
+    coaches = coachResult.data || [];
+    teams = teamResult.data || [];
+    assignments = assignmentResult.data || [];
+
+    render();
+  }
+
+  function teamLabel(team) {
+    return team.name ||
+      team.team_name ||
+      ("Team #" + team.id);
+  }
+
+  function render() {
+    const coachSelect = document.getElementById("approvedCoach");
+    const teamSelect = document.getElementById("team");
+    const coachList = document.getElementById("coachList");
+    const assignmentList = document.getElementById("assignmentList");
+
+    coachSelect.replaceChildren(
+      makeOption("", "Select a coach")
+    );
+    teamSelect.replaceChildren(
+      makeOption("", "Select a team")
+    );
+
+    coaches.forEach(coach => {
+      coachSelect.appendChild(
+        makeOption(coach.user_id, coach.user_id)
+      );
+    });
+
+    teams.forEach(team => {
+      teamSelect.appendChild(
+        makeOption(team.id, teamLabel(team))
+      );
+    });
+
+    coachList.replaceChildren();
+    assignmentList.replaceChildren();
+
+    if (!coaches.length) {
+      coachList.textContent = "No approved coaches yet.";
+    }
+
+    coaches.forEach(coach => {
+      const entry = document.createElement("div");
+      entry.className = "entry";
+
+      const name = document.createElement("p");
+      name.textContent = coach.user_id;
+
+      const button = document.createElement("button");
+      button.className = "danger";
+      button.textContent = "Revoke Coach Access";
+      button.onclick = () => revokeCoach(coach.user_id);
+
+      entry.append(name, button);
+      coachList.appendChild(entry);
+    });
+
+    if (!assignments.length) {
+      assignmentList.textContent = "No team assignments yet.";
+    }
+
+    assignments.forEach(assignment => {
+      const entry = document.createElement("div");
+      entry.className = "entry";
+
+      const team = teams.find(
+        t => String(t.id) === String(assignment.team_id)
+      );
+
+      const description = document.createElement("p");
+      description.textContent =
+        (team ? teamLabel(team) : "Team #" + assignment.team_id) +
+        " — Coach: " + assignment.user_id;
+
+      const button = document.createElement("button");
+      button.className = "danger";
+      button.textContent = "Remove Assignment";
+      button.onclick = () => removeAssignment(assignment.id);
+
+      entry.append(description, button);
+      assignmentList.appendChild(entry);
+    });
+  }
+
+  document.getElementById("approveForm")
+    .addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const userId = document.getElementById("coachId")
+        .value.trim();
+
+      if (!confirm("Approve this account as a coach?")) return;
+
+      const { error } = await db.from("staff_roles")
+        .insert({ user_id: userId, role: "coach" });
+
+      if (error) {
+        alert("Could not approve coach: " + error.message);
+        return;
+      }
+
+      document.getElementById("coachId").value = "";
+      await loadData();
+      alert("Coach approved!");
+    });
+
+  document.getElementById("assignForm")
+    .addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const userId = document.getElementById("approvedCoach").value;
+      const teamId = Number(document.getElementById("team").value);
+
+      const alreadyAssigned = assignments.some(
+        a => a.user_id === userId && a.team_id === teamId
+      );
+
+      if (alreadyAssigned) {
+        alert("This coach is already assigned to that team.");
+        return;
+      }
+
+      const { error } = await db.from("coach_assignments")
+        .insert({ user_id: userId, team_id: teamId });
+
+      if (error) {
+        alert("Could not assign team: " + error.message);
+        return;
+      }
+
+      await loadData();
+      alert("Team assigned!");
+    });
+
+  async function removeAssignment(id) {
+    if (!confirm("Remove this team assignment?")) return;
+
+    const { error } = await db.from("coach_assignments")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadData();
+  }
+
+  async function revokeCoach(userId) {
+    if (!confirm(
+      "Revoke this coach's access and remove their team assignments?"
+    )) return;
+
+    const { error: assignmentError } =
+      await db.from("coach_assignments")
+        .delete()
+        .eq("user_id", userId);
+
+    if (assignmentError) {
+      alert("Could not remove assignments: " +
+        assignmentError.message);
+      return;
+    }
+
+    const { error } = await db.from("staff_roles")
+      .delete()
+      .eq("user_id", userId)
+      .eq("role", "coach");
+
+    if (error) {
+      alert("Could not revoke access: " + error.message);
+      return;
+    }
+
+    await loadData();
+    alert("Coach access revoked.");
+  }
+
+  async function start() {
+    const authorized = await checkAccess();
+    if (authorized) await loadData();
+  }
+
+  start();
+</script>
+</body>
+</html>
+
