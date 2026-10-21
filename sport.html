@@ -190,12 +190,33 @@ async function loadSportGames() {
 }
 loadSportGames();
 
-async function displayFootballRosters() {
-    const params = new URLSearchParams(window.location.search);
-    const sportId = params.get("id");
 
-    // Football is sport ID 1
-    if (sportId !== "1") return;
+async function displaySportRosters() {
+  const params = new URLSearchParams(window.location.search);
+  const sportId = Number(params.get("id"));
+
+  if (!Number.isInteger(sportId) || sportId < 1) return;
+
+  const { data: teams, error: teamsError } = await db
+    .from("teams")
+    .select("id, name")
+    .eq("sport_id", sportId)
+    .order("id");
+
+  const varsityDiv = document.getElementById("varsity-roster");
+  const jvDiv = document.getElementById("jv-roster");
+
+  if (!varsityDiv || !jvDiv) return;
+
+  if (teamsError) {
+    console.error("Team loading error:", teamsError.message);
+    varsityDiv.textContent = "Unable to load teams.";
+    jvDiv.textContent = "";
+    return;
+  }
+
+  const teamIds = (teams || []).map(team => team.id);
+
 
     const { data, error } = await db
         .from("team_rosters")
@@ -205,11 +226,9 @@ async function displayFootballRosters() {
             position,
             athletes(first_name, last_name)
         `)
-        .in("team_id", [1, 15])
+       .in("team_id", teamIds)
         .order("jersey_number");
 
-    const varsityDiv = document.getElementById("varsity-roster");
-    const jvDiv = document.getElementById("jv-roster");
 
     if (!varsityDiv || !jvDiv) return;
 
@@ -277,12 +296,22 @@ async function displayFootballRosters() {
         container.appendChild(table);
     }
 
-    renderRoster(varsityDiv, 1);
-    renderRoster(jvDiv, 15);
+
+if (sportId === 1) {
+  renderRoster(varsityDiv, 1);
+  renderRoster(jvDiv, 15);
+} else if (teamIds.length > 0) {
+  renderRoster(varsityDiv, teamIds[0]);
+  jvDiv.textContent = "No JV team roster available yet.";
+} else {
+  varsityDiv.textContent = "No teams available yet.";
+  jvDiv.textContent = "No JV team roster available yet.";
+}
+
 }
 
 loadSport();
-displayFootballRosters();
+displaySportRosters();
 
   </script>
 </body>
