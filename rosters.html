@@ -334,9 +334,27 @@ editButton.style.border = "none";
 editButton.style.borderRadius = "6px";
 editButton.style.cursor = "pointer";
 
+
 editButton.addEventListener("click", () => {
-  alert("Editing " + name + " — coming next!");
+  const newFirstName = prompt("First Name:", athlete.first_name);
+  if (newFirstName === null) return;
+
+  const newLastName = prompt("Last Name:", athlete.last_name);
+  if (newLastName === null) return;
+
+  const newGraduationYear = prompt(
+    "Graduation Year:",
+    athlete.graduation_year || ""
+  );
+  if (newGraduationYear === null) return;
+
+  alert(
+    "Updated information entered for " +
+    newFirstName + " " + newLastName +
+    ". Saving to the database is our next step!"
+  );
 });
+
 
 entry.appendChild(editButton);
 
