@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coach Registration | Longhorn Athletics</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f3;
+      color: #173b28;
+    }
+    header {
+      background: #155734;
+      color: white;
+      text-align: center;
+      padding: 30px 15px;
+      border-bottom: 5px solid #d9b34a;
+    }
+    main {
+      max-width: 480px;
+      margin: 35px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: white;
+      padding: 28px;
+      border-radius: 12px;
+      border: 1px solid #dce5dd;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 7px;
+      border: 1px solid #b9c9bc;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 22px;
+      background: #155734;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+    #message {
+      margin-top: 18px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    a { color: #155734; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🐂 Longhorn Athletics</h1>
+  <p>Battle Mountain High School</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Coach Registration</h2>
+    <p>
+      Create your account to request access to the
+      Longhorn Athletics coaching portal.
+      All coaching accounts require Athletic Director approval.
+    </p>
+
+    <form id="registrationForm">
+      <label for="fullName">Full Name</label>
+      <input id="fullName" type="text"
+        autocomplete="name" maxlength="100" required>
+
+      <label for="email">Email Address</label>
+      <input id="email" type="email"
+        autocomplete="email" required>
+
+      <label for="password">Password</label>
+      <input id="password" type="password"
+        autocomplete="new-password" minlength="8" required>
+
+      <button id="submitButton" type="submit">
+        Create Account
+      </button>
+    </form>
+
+    <p id="message" role="status" aria-live="polite"></p>
+
+    <p>Already registered? <a href="login.html">Sign in</a></p>
+  </section>
+</main>
+
+<script>
+  const SUPABASE_URL =
+    "https://zwbjethanfvgqknngcii.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_k7rAGIhYj_t_BmDfbwp42w_Yj375UCa";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  const form = document.getElementById("registrationForm");
+  const button = document.getElementById("submitButton");
+  const message = document.getElementById("message");
+
+  function showMessage(text) {
+    message.textContent = text;
+  }
+
+  async function submitCoachRequest(user, fullName, email) {
+    const { error } = await db
+      .from("coach_requests")
+      .upsert({
+        user_id: user.id,
+        full_name: fullName,
+        email: email
+      }, { onConflict: "user_id", ignoreDuplicates: true });
+
+    if (error) throw error;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const fullName =
+      document.getElementById("fullName").value.trim();
+
+    const email =
+      document.getElementById("email").value.trim().toLowerCase();
+
+    const password =
+      document.getElementById("password").value;
+
+    if (!fullName) {
+      showMessage("Please enter your name.");
+      return;
+    }
+
+    button.disabled = true;
+    showMessage("Creating your account...");
+
+    try {
+      const { data, error } = await db.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo:
+            window.location.origin + "/login.html",
+          data: { full_name: fullName }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.session && data.user) {
+        await submitCoachRequest(
+          data.user, fullName, email
+        );
+
+        showMessage(
+          "Your account has been created and your coaching " +
+          "request submitted. Please wait for Athletic " +
+          "Director approval before accessing coaching tools."
+        );
+      } else {
+        showMessage(
+          "Check your email for a verification link. " +
+          "After verifying, sign in to complete your " +
+          "coaching access request."
+        );
+      }
+
+      form.reset();
+    } catch (error) {
+      showMessage("Registration issue: " + error.message);
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
