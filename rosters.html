@@ -89,16 +89,64 @@
       </div>
     </section>
 
-    <section class="card">
-      <h2>Add an Athlete</h2>
-      <p>
-        Add a new athlete or assign an existing athlete
-        to the selected team.
-      </p>
-      <div id="athleteFormArea">
-        Athlete management tools coming next.
-      </div>
-    </section>
+
+<section class="card">
+  <h2>Add an Athlete</h2>
+  <p>
+    Add a new athlete or assign an existing athlete
+    to the selected team.
+  </p>
+
+  <div id="athleteFormArea">
+    <form id="addAthleteForm">
+
+      <label for="firstName">First Name</label>
+      <input
+        id="firstName"
+        type="text"
+        required
+      >
+
+      <label for="lastName">Last Name</label>
+      <input
+        id="lastName"
+        type="text"
+        required
+      >
+
+      <label for="graduationYear">Graduation Year</label>
+      <input
+        id="graduationYear"
+        type="number"
+        min="2026"
+        max="2040"
+        required
+      >
+
+      <label for="jerseyNumber">Jersey Number</label>
+      <input
+        id="jerseyNumber"
+        type="text"
+        placeholder="Example: 88"
+      >
+
+      <label for="position">Position</label>
+      <input
+        id="position"
+        type="text"
+        placeholder="Example: WR, DB"
+      >
+
+      <button type="submit">
+        Add Athlete to Selected Team
+      </button>
+
+    </form>
+
+    <p id="athleteFormMessage" role="status"></p>
+  </div>
+</section>
+
 
   </div>
 </main>
