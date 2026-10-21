@@ -386,10 +386,22 @@ name.style.fontWeight = "bold";
         t => String(t.id) === String(assignment.team_id)
       );
 
-      const description = document.createElement("p");
-      description.textContent =
-        (team ? teamLabel(team) : "Team #" + assignment.team_id) +
-        " — Coach: " + assignment.user_id;
+
+const coach = coaches.find(
+  c => c.user_id === assignment.user_id
+);
+
+const description = document.createElement("p");
+
+
+const coachName = coach
+  ? coach.full_name + " (" + coach.email + ")"
+  : "Account ID: " + assignment.user_id;
+
+
+description.textContent =
+  (team ? teamLabel(team) : "Team #" + assignment.team_id) +
+  " — Coach: " + coachName;
 
       const button = document.createElement("button");
       button.className = "danger";
