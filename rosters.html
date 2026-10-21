@@ -471,9 +471,36 @@ removeButton.style.border = "none";
 removeButton.style.borderRadius = "5px";
 removeButton.style.cursor = "pointer";
 
-removeButton.addEventListener("click", () => {
-  alert("Remove Player selected for " + name);
+
+removeButton.addEventListener("click", async () => {
+  const confirmed = confirm(
+    "Remove " + name + " from this team's roster?\n\n" +
+    "This will not delete the athlete's profile."
+  );
+
+  if (!confirmed) return;
+
+  const { data: removed, error } = await db
+    .from("team_rosters")
+    .delete()
+    .eq("id", player.id)
+    .select("id");
+
+  if (error) {
+    alert("Unable to remove player: " + error.message);
+    return;
+  }
+
+  if (!removed || removed.length === 0) {
+    alert("Player was not removed. Check roster permissions.");
+    return;
+  }
+
+  alert(name + " was removed from this team's roster.");
+
+  await loadRoster(document.getElementById("teamSelect").value);
 });
+
 
 entry.appendChild(removeButton);
 
