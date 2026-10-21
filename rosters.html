@@ -312,7 +312,28 @@ athletes (
     return;
   }
 
-  data.forEach(player => {
+  
+data.sort((a, b) => {
+  const aNumber = Number(a.jersey_number);
+  const bNumber = Number(b.jersey_number);
+
+  const aValid = a.jersey_number != null &&
+    String(a.jersey_number).trim() !== "" &&
+    Number.isFinite(aNumber);
+
+  const bValid = b.jersey_number != null &&
+    String(b.jersey_number).trim() !== "" &&
+    Number.isFinite(bNumber);
+
+  if (!aValid && !bValid) return 0;
+  if (!aValid) return 1;
+  if (!bValid) return -1;
+
+  return aNumber - bNumber;
+});
+
+data.forEach(player => {
+
     const athlete = player.athletes;
     const entry = document.createElement("p");
 
