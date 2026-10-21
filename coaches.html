@@ -158,11 +158,13 @@ const SUPABASE_URL =
     const { data: sessionData, error: sessionError } =
       await db.auth.getUser();
 
-    if (sessionError || !sessionData.user) {
-      window.location.replace("login.html");
-      return false;
-    }
-
+if (sessionError || !sessionData?.user) {
+  showStatus(
+    "Login verification failed: " +
+    (sessionError?.message || "No active login session found.")
+  );
+  return false;
+}
     const { data, error } = await db
       .from("staff_roles")
       .select("role")
