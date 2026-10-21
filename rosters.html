@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teams & Rosters | Longhorn Athletics</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f3;
+      color: #173b28;
+    }
+    header {
+      background: #155734;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-bottom: 5px solid #d9b34a;
+    }
+    main {
+      max-width: 1050px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dce5dd;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .button {
+      display: inline-block;
+      background: #155734;
+      color: white;
+      text-decoration: none;
+      padding: 12px 18px;
+      border-radius: 7px;
+    }
+    select, input, button {
+      padding: 11px;
+      font-size: 16px;
+      border-radius: 7px;
+      border: 1px solid #b9c9bc;
+    }
+    button {
+      background: #155734;
+      color: white;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+    .status { margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🐂 Longhorn Athletics</h1>
+  <p>Teams & Rosters — Super Admin</p>
+</header>
+
+<main>
+  <p>
+    <a class="button" href="admin.html">
+      ← Back to Dashboard
+    </a>
+  </p>
+
+  <p id="status" class="status">
+    Roster Management page created.
+  </p>
+
+  <div id="dashboard">
+
+    <section class="card">
+      <h2>Select a Team</h2>
+      <p>Choose a sport and team to manage its roster.</p>
+      <select id="teamSelect">
+        <option value="">Select a team...</option>
+      </select>
+    </section>
+
+    <section class="card">
+      <h2>Team Roster</h2>
+      <div id="rosterList">
+        Select a team to view its roster.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Add an Athlete</h2>
+      <p>
+        Add a new athlete or assign an existing athlete
+        to the selected team.
+      </p>
+      <div id="athleteFormArea">
+        Athlete management tools coming next.
+      </div>
+    </section>
+
+  </div>
+</main>
+
+</body>
+</html>
