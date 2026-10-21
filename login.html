@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Staff Login | Longhorn Athletics</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7f4;
+      color: #203225;
+    }
+    header {
+      background: #135b38;
+      color: white;
+      text-align: center;
+      padding: 35px 20px;
+    }
+    header h1 { margin: 0 0 12px; }
+    header p { color: #f0c23c; font-weight: bold; }
+    main {
+      max-width: 440px;
+      margin: 50px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: white;
+      border-top: 5px solid #f0c23c;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 5px 20px #00000012;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 16px 0 7px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 13px;
+      background: #135b38;
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    #message { margin-top: 16px; line-height: 1.5; }
+    a { color: #135b38; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Longhorn Athletics</h1>
+    <p>BMHS LONGHORNS • PRIDE • TRADITION • EXCELLENCE</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Staff Login</h2>
+      <p>For authorized coaches and athletic administrators.</p>
+
+      <form id="login-form">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" autocomplete="email" required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password"
+               autocomplete="current-password" required>
+
+        <button id="login-button" type="submit">Sign In</button>
+      </form>
+
+      <button id="reset-button" type="button">
+        Set or Reset Password
+      </button>
+
+      <p id="message" role="status" aria-live="polite"></p>
+      <p><a href="index.html">← Back to Longhorn Athletics</a></p>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://zwbjethanfvgqknngcii.supabase.co";
+    const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const message = document.getElementById("message");
+    const loginButton = document.getElementById("login-button");
+
+    // Handle password recovery and email verification redirects.
+    async function handleAuthRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get("token_hash");
+      const type = params.get("type");
+
+      if (tokenHash && type) {
+        const { error } = await db.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type
+        });
+
+        message.textContent = error
+          ? error.message
+          : "Email verified. You can now sign in.";
+
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      }
+
+      const hash = new URLSearchParams(
+        window.location.hash.substring(1)
+      );
+
+      if (hash.get("type") === "recovery") {
+        const newPassword = prompt(
+          "Enter a new password (at least 12 characters):"
+        );
+
+        if (newPassword && newPassword.length >= 12) {
+          const { error } = await db.auth.updateUser({
+            password: newPassword
+          });
+
+          message.textContent = error
+            ? error.message
+            : "Password updated. You can now sign in.";
+        } else if (newPassword !== null) {
+          message.textContent =
+            "Your password must have at least 12 characters.";
+        }
+      }
+    }
+
+    document.getElementById("login-form")
+      .addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        loginButton.disabled = true;
+        message.textContent = "Signing in...";
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        const { error } = await db.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          message.textContent = error.message;
+        } else {
+          message.textContent =
+            "Login successful! Staff dashboard is coming next.";
+        }
+
+        loginButton.disabled = false;
+      });
+
+    document.getElementById("reset-button")
+      .addEventListener("click", async () => {
+        const email = document.getElementById("email").value.trim();
+
+        if (!email) {
+          message.textContent = "Enter your email address first.";
+          return;
+        }
+
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/login.html"
+        });
+
+        message.textContent = error
+          ? error.message
+          : "If the account exists, check your email for a password link.";
+      });
+
+    handleAuthRedirect();
+  </script>
+</body>
+</html>
