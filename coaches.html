@@ -233,8 +233,46 @@ async function loadPendingCoaches() {
       ? "✓ Email Verified"
       : "⏳ Awaiting Email Verification";
 
-    entry.append(name, email, verification);
-    container.appendChild(entry);
+
+const approveButton = document.createElement("button");
+approveButton.textContent = "Approve Coach";
+approveButton.disabled = !coach.email_verified;
+
+if (!coach.email_verified) {
+  approveButton.title = "Email verification required";
+}
+
+approveButton.addEventListener("click", async () => {
+  if (!confirm(
+    "Approve " + coach.full_name + " as a Longhorn coach?"
+  )) return;
+
+  approveButton.disabled = true;
+  approveButton.textContent = "Approving...";
+
+  const { error } = await db
+    .from("staff_roles")
+    .insert({
+      user_id: coach.user_id,
+      role: "coach"
+    });
+
+  if (error) {
+    alert("Approval failed: " + error.message);
+    approveButton.disabled = false;
+    approveButton.textContent = "Approve Coach";
+    return;
+  }
+
+  alert(coach.full_name + " has been approved!");
+
+  await loadData();
+  await loadPendingCoaches();
+});
+
+entry.append(name, email, verification, approveButton);
+container.appendChild(entry);
+
   });
 }
 
