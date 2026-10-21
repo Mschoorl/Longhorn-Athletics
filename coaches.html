@@ -194,6 +194,50 @@ if (sessionError || !sessionData?.user) {
     return true;
   }
 
+async function loadPendingCoaches() {
+  const container =
+    document.getElementById("pendingCoachList");
+
+  container.textContent = "Loading pending requests...";
+
+  const { data, error } = await db.rpc(
+    "get_pending_coaches"
+  );
+
+  if (error) {
+    container.textContent =
+      "Unable to load requests: " + error.message;
+    return;
+  }
+
+  container.replaceChildren();
+
+  if (!data || data.length === 0) {
+    container.textContent =
+      "No pending coach requests.";
+    return;
+  }
+
+  data.forEach(coach => {
+    const entry = document.createElement("div");
+    entry.className = "entry";
+
+    const name = document.createElement("h3");
+    name.textContent = coach.full_name;
+
+    const email = document.createElement("p");
+    email.textContent = coach.email;
+
+    const verification = document.createElement("p");
+    verification.textContent = coach.email_verified
+      ? "✓ Email Verified"
+      : "⏳ Awaiting Email Verification";
+
+    entry.append(name, email, verification);
+    container.appendChild(entry);
+  });
+}
+
   async function loadData() {
     const [coachResult, teamResult, assignmentResult] =
       await Promise.all([
@@ -407,10 +451,14 @@ if (sessionError || !sessionData?.user) {
     alert("Coach access revoked.");
   }
 
-  async function start() {
-    const authorized = await checkAccess();
-    if (authorized) await loadData();
+async function start() {
+  const authorized = await checkAccess();
+
+  if (authorized) {
+    await loadData();
+    await loadPendingCoaches();
   }
+}
 
   start();
 </script>
