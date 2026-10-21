@@ -279,9 +279,9 @@ container.appendChild(entry);
   async function loadData() {
     const [coachResult, teamResult, assignmentResult] =
       await Promise.all([
-        db.from("staff_roles")
-          .select("user_id, role")
-          .eq("role", "coach"),
+
+db.rpc("get_approved_coaches"),
+
 
         db.from("teams")
           .select("*")
