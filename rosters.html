@@ -150,8 +150,46 @@
     return true;
   }
 
-  async function initialize() {
-    await checkAccess();
+
+async function loadTeams() {
+  const teamSelect = document.getElementById("teamSelect");
+
+  const { data, error } = await db
+    .from("teams")
+    .select("id, name, level, season_year")
+    .order("name")
+    .order("level");
+
+  if (error) {
+    statusEl.textContent =
+      "Unable to load teams: " + error.message;
+    return;
+  }
+
+  teamSelect.replaceChildren(
+    new Option("Select a team...", "")
+  );
+
+  data.forEach(team => {
+    const label =
+      team.name + " — " +
+      team.level + " (" +
+      team.season_year + ")";
+
+    teamSelect.add(
+      new Option(label, team.id)
+    );
+  });
+}
+
+async function initialize() {
+  const authorized = await checkAccess();
+
+  if (authorized) {
+    await loadTeams();
+  }
+}
+
   }
 
   initialize();
