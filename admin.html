@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AD Dashboard | Longhorn Athletics</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f4;
+      color: #103c2a;
+    }
+    header {
+      background: #105737;
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 10px; }
+    header p { color: #f4c430; font-weight: bold; }
+    main { max-width: 1050px; margin: 35px auto; padding: 0 20px; }
+    .card {
+      background: white;
+      padding: 26px;
+      border-radius: 12px;
+      border-top: 5px solid #eab82e;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 18px #0000000a;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    button, .button {
+      display: inline-block;
+      background: #105737;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 12px 18px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    button:hover, .button:hover { background: #0b4029; }
+    #dashboard { display: none; }
+    #status { margin-bottom: 20px; }
+    #account { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Longhorn Athletics</h1>
+    <p>ATHLETIC DIRECTOR CONTROL CENTER</p>
+  </header>
+
+  <main>
+    <div id="status" class="card" role="status">
+      Checking your administrator access...
+    </div>
+
+    <div id="dashboard">
+      <div class="card">
+        <h2>Welcome, Athletic Director!</h2>
+        <p id="account"></p>
+        <p>Your Super Admin access has been verified.</p>
+        <button id="signout">Sign Out</button>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Coaches</h2>
+          <p>Approve coaches and assign them to teams.</p>
+          <p><strong>Coming next</strong></p>
+        </div>
+
+        <div class="card">
+          <h2>Teams & Rosters</h2>
+          <p>Oversee Varsity, JV, and athlete rosters.</p>
+          <p><strong>Coming next</strong></p>
+        </div>
+
+        <div class="card">
+          <h2>Schedules & Scores</h2>
+          <p>Review games and approve results.</p>
+          <p><strong>Coming next</strong></p>
+        </div>
+
+        <div class="card">
+          <h2>Player Statistics</h2>
+          <p>Review and publish player statistics.</p>
+          <p><strong>Coming next</strong></p>
+        </div>
+      </div>
+
+      <p><a href="index.html">← Back to Longhorn Athletics</a></p>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL =
+      "https://zwbjethanfvgqknngcii.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_k7rAGIWYj_t_BmDfbwp42w_Yj375UCa";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const statusBox = document.getElementById("status");
+    const dashboard = document.getElementById("dashboard");
+
+    async function checkAdmin() {
+      try {
+        const { data: authData, error: authError } =
+          await db.auth.getUser();
+
+        if (authError || !authData.user) {
+          statusBox.textContent = "Please sign in first.";
+          const link = document.createElement("a");
+          link.href = "login.html";
+          link.textContent = " Go to Staff Login";
+          statusBox.appendChild(link);
+          return;
+        }
+
+        const { data: staff, error: roleError } = await db
+          .from("staff_roles")
+          .select("role")
+          .eq("user_id", authData.user.id)
+          .single();
+
+        if (roleError || staff?.role !== "super_admin") {
+          statusBox.textContent =
+            "Access denied. This page is for authorized athletic administrators.";
+          return;
+        }
+
+        document.getElementById("account").textContent =
+          "Signed in as: " + authData.user.email;
+
+        statusBox.style.display = "none";
+        dashboard.style.display = "block";
+      } catch (error) {
+        statusBox.textContent =
+          "Unable to verify administrator access. Please try again.";
+        console.error(error);
+      }
+    }
+
+    document.getElementById("signout").addEventListener(
+      "click",
+      async () => {
+        await db.auth.signOut();
+        window.location.replace("login.html");
+      }
+    );
+
+    checkAdmin();
+  </script>
+</body>
+</html>
