@@ -323,6 +323,23 @@ async function loadRoster(teamId) {
       " | Class of " +
       (athlete?.graduation_year || "—");
 
+const editButton = document.createElement("button");
+editButton.type = "button";
+editButton.textContent = "Edit Player";
+editButton.style.marginLeft = "12px";
+editButton.style.padding = "6px 12px";
+editButton.style.background = "#145a32";
+editButton.style.color = "white";
+editButton.style.border = "none";
+editButton.style.borderRadius = "6px";
+editButton.style.cursor = "pointer";
+
+editButton.addEventListener("click", () => {
+  alert("Editing " + name + " — coming next!");
+});
+
+entry.appendChild(editButton);
+
     rosterList.appendChild(entry);
   });
 }
