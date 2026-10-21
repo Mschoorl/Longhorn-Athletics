@@ -328,6 +328,125 @@ async function loadRoster(teamId) {
 }
 
 
+async function findExistingAthlete(firstName, lastName, graduationYear) {
+  const { data, error } = await db
+    .from("athletes")
+    .select("id, first_name, last_name, graduation_year")
+    .ilike("first_name", firstName.trim())
+    .ilike("last_name", lastName.trim())
+    .eq("graduation_year", graduationYear);
+
+  if (error) {
+    throw new Error("Unable to check existing athletes: " + error.message);
+  }
+
+  return data || [];
+}
+
+async function saveAthlete(event) {
+  event.preventDefault();
+
+  const message = document.getElementById("athleteFormMessage");
+  const teamId = document.getElementById("teamSelect").value;
+
+  if (!teamId) {
+    message.textContent = "Please select a team first.";
+    return;
+  }
+
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const graduationYear = Number(
+    document.getElementById("graduationYear").value
+  );
+  const jerseyNumber = document.getElementById("jerseyNumber").value.trim();
+  const position = document.getElementById("position").value.trim();
+
+  const button = document.querySelector(
+    "#addAthleteForm button[type='submit']"
+  );
+  button.disabled = true;
+  message.textContent = "Checking athlete records...";
+
+  try {
+    const matches = await findExistingAthlete(
+      firstName,
+      lastName,
+      graduationYear
+    );
+
+    if (matches.length > 1) {
+      throw new Error(
+        "Multiple matching athletes found. Review them in Supabase before continuing."
+      );
+    }
+
+    let athleteId;
+
+    if (matches.length === 1) {
+      const confirmed = confirm(
+        "An athlete with this name and graduation year already exists. " +
+        "Is this the same student you want to add to this team?"
+      );
+
+      if (!confirmed) {
+        message.textContent = "No changes made.";
+        return;
+      }
+
+      athleteId = matches[0].id;
+    } else {
+      const { data: athlete, error: athleteError } = await db
+        .from("athletes")
+        .insert({
+          first_name: firstName,
+          last_name: lastName,
+          graduation_year: graduationYear
+        })
+        .select("id")
+        .single();
+
+      if (athleteError) throw athleteError;
+      athleteId = athlete.id;
+    }
+
+    const { data: existingRoster, error: rosterCheckError } = await db
+      .from("team_rosters")
+      .select("id")
+      .eq("team_id", teamId)
+      .eq("athlete_id", athleteId)
+      .maybeSingle();
+
+    if (rosterCheckError) throw rosterCheckError;
+
+    if (existingRoster) {
+      message.textContent = "This athlete is already on the selected roster.";
+      return;
+    }
+
+    const { error: rosterError } = await db
+      .from("team_rosters")
+      .insert({
+        team_id: Number(teamId),
+        athlete_id: athleteId,
+        jersey_number: jerseyNumber || null,
+        position: position || null
+      });
+
+    if (rosterError) throw rosterError;
+
+    message.textContent = "Athlete successfully added to the team!";
+    document.getElementById("addAthleteForm").reset();
+    await loadRoster(teamId);
+
+  } catch (error) {
+    message.textContent = "Unable to save athlete: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+
 async function initialize() {
   const authorized = await checkAccess();
 
@@ -338,8 +457,12 @@ async function initialize() {
       .addEventListener("change", async function () {
         await loadRoster(this.value);
       });
+
+    document.getElementById("addAthleteForm")
+      .addEventListener("submit", saveAthlete);
   }
 }
+
 
 
 
