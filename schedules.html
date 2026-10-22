@@ -127,8 +127,60 @@
         "Access verified! Welcome to Schedule Management.";
       
 document.getElementById("schedule-form").hidden = false;
-
+await loadScheduleGames();
     }
+
+async function loadScheduleGames() {
+  const dropdown = document.getElementById("game-select");
+
+  dropdown.innerHTML =
+    '<option value="">Choose a game...</option>';
+
+  const { data: games, error } = await db
+    .from("games")
+    .select(`
+      id,
+      game_date,
+      opponent,
+      teams (
+        name,
+        level,
+        sports (name)
+      )
+    `)
+    .order("game_date", { ascending: false });
+
+  if (error) {
+    console.error("Error loading games:", error);
+    document.getElementById("status").textContent =
+      "Could not load games: " + error.message;
+    return;
+  }
+
+  for (const game of games) {
+    const option = document.createElement("option");
+    option.value = game.id;
+
+    const sport = game.teams?.sports?.name
+      || game.teams?.name
+      || "Unknown Sport";
+
+    const level = game.teams?.level || "";
+
+    const date = new Date(game.game_date)
+      .toLocaleDateString("en-US", {
+        timeZone: "America/Los_Angeles",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+
+    option.textContent =
+      `${sport} ${level} | ${date} vs ${game.opponent}`;
+
+    dropdown.appendChild(option);
+  }
+}
 
     checkScheduleAccess();
   </script>
