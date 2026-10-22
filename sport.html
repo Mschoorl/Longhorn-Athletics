@@ -67,6 +67,45 @@
       padding: 30px;
       color: #56645a;
     }
+    
+.sport-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.sport-tab {
+  flex: 1;
+  min-width: 140px;
+  padding: 14px 18px;
+  border: 2px solid #07532f;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #07532f;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sport-tab:hover {
+  border-color: #e9b83f;
+}
+
+.sport-tab:focus-visible {
+  outline: 3px solid #e9b83f;
+  outline-offset: 3px;
+}
+
+.sport-tab[aria-selected="true"] {
+  background: #07532f;
+  color: #ffffff;
+}
+
+.card[hidden] {
+  display: none !important;
+}
+
   </style>
 
 <script>
@@ -200,6 +239,22 @@ async function loadPublicPlayerStats() {
 
   <main>
   
+<div class="sport-tabs" role="tablist" aria-label="Sport information">
+  <button type="button" class="sport-tab" data-section="schedule-section">
+    Schedule &amp; Scores
+  </button>
+
+  <button type="button" class="sport-tab" data-section="roster-section">
+    Team Rosters
+  </button>
+
+  <button type="button" class="sport-tab" data-section="stats-section">
+    Player Stats
+  </button>
+
+<div class="card" id="schedule-section">
+
+
 
 <div class="card">
   <h2>Schedule &amp; Scores</h2>
@@ -221,7 +276,9 @@ async function loadPublicPlayerStats() {
 
     
 
-<div class="card">
+
+<div class="card" id="roster-section">
+
     <h2>Team Roster</h2>
 
     <h3>Varsity</h3>
@@ -231,7 +288,9 @@ async function loadPublicPlayerStats() {
     <div id="jv-roster">Loading JV roster...</div>
 </div>
 
-    <div class="card">
+
+<div class="card" id="stats-section">
+
     
       
 <section id="playerStatsSection" style="margin-top:30px;">
@@ -245,6 +304,42 @@ async function loadPublicPlayerStats() {
 </section>
 
     </div>
+  
+<script>
+  const sportTabs = document.querySelectorAll(".sport-tab");
+
+  const sportSections = [
+    "schedule-section",
+    "roster-section",
+    "stats-section"
+  ];
+
+  function showSportSection(sectionId) {
+    sportSections.forEach(id => {
+      const section = document.getElementById(id);
+      if (section) {
+        section.hidden = id !== sectionId;
+      }
+    });
+
+    sportTabs.forEach(tab => {
+      const active = tab.dataset.section === sectionId;
+      tab.setAttribute("aria-selected", String(active));
+      tab.style.backgroundColor = active ? "#07532f" : "#ffffff";
+      tab.style.color = active ? "#ffffff" : "#07532f";
+      tab.style.fontWeight = active ? "bold" : "normal";
+    });
+  }
+
+  sportTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      showSportSection(tab.dataset.section);
+    });
+  });
+
+  showSportSection("schedule-section");
+</script>
+
   </main>
 
   <footer>
