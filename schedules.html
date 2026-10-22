@@ -68,6 +68,31 @@
       <h2>Schedule Management</h2>
       <p id="status">Page setup in progress.</p>
       
+<div id="new-game-section" hidden style="margin-top:25px;">
+
+  <h3>Add a New Game</h3>
+
+  <p>
+    Create a new game or event for a Longhorn Athletics team.
+  </p>
+
+  <button
+    type="button"
+    id="show-new-game"
+    class="button"
+    style="border:none;cursor:pointer;"
+  >
+    + Add New Game
+  </button>
+
+  <div id="new-game-form" hidden style="margin-top:20px;">
+    <p>New game form coming next!</p>
+  </div>
+
+  <hr style="margin:30px 0;">
+
+</div>
+
 <div id="schedule-form" hidden style="margin-top:25px;">
 
   <label for="game-select">
@@ -193,6 +218,7 @@
         "Access verified! Welcome to Schedule Management.";
       
 document.getElementById("schedule-form").hidden = false;
+      document.getElementById("new-game-section").hidden = false;
 await loadScheduleGames();
     }
 
