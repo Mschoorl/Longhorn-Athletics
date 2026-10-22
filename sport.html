@@ -71,6 +71,11 @@
 
 <script>
 async function loadPublicPlayerStats() {
+  
+  const sportId = Number(
+    new URLSearchParams(window.location.search).get("id")
+  );
+
   const message = document.getElementById("playerStatsMessage");
   const container = document.getElementById("playerStatsContainer");
 
