@@ -632,6 +632,80 @@ document.getElementById("new-game-time-tbd")
 
   });
 
+async function createNewGame() {
+  const message = document.getElementById("new-game-message");
+  const button = document.getElementById("create-game");
+
+  const teamId = document.getElementById("new-game-team").value;
+  const opponent = document.getElementById("new-game-opponent").value.trim();
+  const date = document.getElementById("new-game-date").value;
+  const time = document.getElementById("new-game-time").value;
+  const timeTBD = document.getElementById("new-game-time-tbd").checked;
+  const location = document.getElementById("new-game-location").value.trim();
+  const homeAway = document.getElementById("new-game-home-away").value;
+
+  if (!teamId || !opponent || !date || !homeAway) {
+    message.textContent =
+      "Please select a team, opponent, date, and home/away location.";
+    return;
+  }
+
+  if (!timeTBD && !time) {
+    message.textContent =
+      "Please enter a game time or check Game Time TBD.";
+    return;
+  }
+
+  button.disabled = true;
+  message.textContent = "Creating game...";
+
+  try {
+    const gameDateUTC = nevadaGameDateToUTC(
+      date,
+      timeTBD ? "12:00" : time
+    );
+
+    const { data, error } = await db
+      .from("games")
+      .insert({
+        team_id: Number(teamId),
+        opponent: opponent,
+        game_date: gameDateUTC,
+        time_tbd: timeTBD,
+        location: location || null,
+        home_away: homeAway,
+        status: "Scheduled"
+      })
+      .select("id")
+      .single();
+
+    if (error) throw error;
+
+    message.textContent =
+      "Game created successfully! Game ID: " + data.id;
+
+    document.getElementById("new-game-team").value = "";
+    document.getElementById("new-game-opponent").value = "";
+    document.getElementById("new-game-date").value = "";
+    document.getElementById("new-game-time").value = "";
+    document.getElementById("new-game-time").disabled = false;
+    document.getElementById("new-game-time-tbd").checked = false;
+    document.getElementById("new-game-location").value = "";
+    document.getElementById("new-game-home-away").value = "";
+
+    await loadScheduleGames();
+
+  } catch (error) {
+    message.textContent =
+      "Could not create game: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+document.getElementById("create-game")
+  .addEventListener("click", createNewGame);
+
     checkScheduleAccess();
   </script>
 </body>
