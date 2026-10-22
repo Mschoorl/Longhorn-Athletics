@@ -238,6 +238,75 @@ async function loadPlayersForGame() {
 document.getElementById("gameSelect")
   .addEventListener("change", loadPlayersForGame);
 
+async function loadStatisticsForGame() {
+  const gameId = document.getElementById("gameSelect").value;
+  const playerId = document.getElementById("playerSelect").value;
+  const statSection = document.getElementById("statSection");
+  const statSelect = document.getElementById("statSelect");
+  const statMessage = document.getElementById("statMessage");
+
+  statSection.style.display = "none";
+  statSelect.innerHTML =
+    '<option value="">-- Select a Statistic --</option>';
+
+  if (!gameId || !playerId) return;
+
+  statSection.style.display = "block";
+  statMessage.textContent = "Loading statistics...";
+
+  // Find the sport associated with the selected game's team.
+  const { data: game, error: gameError } = await db
+    .from("games")
+    .select("teams(sport_id)")
+    .eq("id", gameId)
+    .single();
+
+  if (gameError || !game?.teams?.sport_id) {
+    statMessage.textContent = "Unable to identify this game's sport.";
+    return;
+  }
+
+  // Load the statistics available for that sport.
+  const { data: stats, error: statsError } = await db
+    .from("stat_types")
+    .select("id, name")
+    .eq("sport_id", game.teams.sport_id)
+    .order("name");
+
+  if (statsError) {
+    console.error(statsError);
+    statMessage.textContent =
+      "Unable to load statistics: " + statsError.message;
+    return;
+  }
+
+  if (!stats || stats.length === 0) {
+    statMessage.textContent =
+      "No statistics have been configured for this sport.";
+    return;
+  }
+
+  stats.forEach(stat => {
+    const option = document.createElement("option");
+    option.value = stat.id;
+    option.textContent = stat.name;
+    statSelect.appendChild(option);
+  });
+
+  statMessage.textContent = "Select a statistic to enter.";
+}
+
+// Show the correct statistics when a player is selected.
+document.getElementById("playerSelect")
+  .addEventListener("change", loadStatisticsForGame);
+
+// Hide old statistics whenever the selected game changes.
+document.getElementById("gameSelect")
+  .addEventListener("change", () => {
+    document.getElementById("statSection").style.display = "none";
+    document.getElementById("statSelect").value = "";
+  });
+
 async function initializeStatsPage() {
   await checkStaffAccess();
 
