@@ -69,6 +69,116 @@
     }
   </style>
 
+async function loadPublicPlayerStats() {
+  const message = document.getElementById("playerStatsMessage");
+  const container = document.getElementById("playerStatsContainer");
+
+  if (!message || !container) return;
+
+  message.textContent = "Loading player statistics...";
+  container.replaceChildren();
+
+  // sportId should already be defined by the sports page.
+  const { data: teams, error: teamError } = await db
+    .from("teams")
+    .select("id")
+    .eq("sport_id", sportId);
+
+  if (teamError || !teams || teams.length === 0) {
+    message.textContent = "No teams found for this sport.";
+    return;
+  }
+
+  const teamIds = teams.map(team => team.id);
+
+  const { data: games, error: gameError } = await db
+    .from("games")
+    .select("id")
+    .in("team_id", teamIds);
+
+  if (gameError) {
+    message.textContent = "Unable to load games.";
+    console.error(gameError);
+    return;
+  }
+
+  if (!games || games.length === 0) {
+    message.textContent = "No player statistics available yet.";
+    return;
+  }
+
+  const gameIds = games.map(game => game.id);
+
+  const { data: stats, error: statsError } = await db
+    .from("player_stats")
+    .select(`
+      athlete_id,
+      value,
+      athletes(first_name, last_name),
+      stat_types(name)
+    `)
+    .in("game_id", gameIds);
+
+  if (statsError) {
+    console.error(statsError);
+    message.textContent = "Unable to load player statistics.";
+    return;
+  }
+
+  if (!stats || stats.length === 0) {
+    message.textContent = "No player statistics available yet.";
+    return;
+  }
+
+  const totals = new Map();
+
+  stats.forEach(stat => {
+    const name = stat.athletes
+      ? `${stat.athletes.first_name} ${stat.athletes.last_name}`
+      : "Unknown Player";
+
+    const statName = stat.stat_types?.name || "Statistic";
+    const key = `${stat.athlete_id}-${statName}`;
+
+    if (!totals.has(key)) {
+      totals.set(key, { name, statName, total: 0 });
+    }
+
+    totals.get(key).total += Number(stat.value) || 0;
+  });
+
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+
+  const header = table.insertRow();
+
+  ["Player", "Statistic", "Total"].forEach(label => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    th.style.textAlign = "left";
+    th.style.padding = "10px";
+    th.style.borderBottom = "2px solid #0b5132";
+    header.appendChild(th);
+  });
+
+  Array.from(totals.values())
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(stat => {
+      const row = table.insertRow();
+
+      [stat.name, stat.statName, stat.total].forEach(value => {
+        const cell = row.insertCell();
+        cell.textContent = value;
+        cell.style.padding = "10px";
+        cell.style.borderBottom = "1px solid #ddd";
+      });
+    });
+
+  container.replaceChildren(table);
+  message.textContent = "";
+}
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 
