@@ -36,8 +36,17 @@
   </header>
 
   <main>
-    <h2>Enter Player Statistics</h2>
-    <p>Statistics entry system coming soon.</p>
+
+<h2>Enter Player Statistics</h2>
+
+<label for="gameSelect"><strong>Select Game:</strong></label>
+
+<select id="gameSelect" style="display:block; width:100%; padding:12px; margin-top:10px; margin-bottom:20px;">
+  <option value="">Loading games...</option>
+</select>
+
+<p id="gameMessage">Choose a game to begin entering statistics.</p>
+
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
