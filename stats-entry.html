@@ -349,6 +349,49 @@ document.getElementById("gameSelect")
     document.getElementById("statSelect").value = "";
   });
 
+function validateStatEntry() {
+  const gameId = document.getElementById("gameSelect").value;
+  const playerId = document.getElementById("playerSelect").value;
+  const statId = document.getElementById("statSelect").value;
+  const valueField = document.getElementById("statValue");
+  const saveButton = document.getElementById("saveStatButton");
+
+  const value = Number(valueField.value);
+
+  const isValid =
+    gameId !== "" &&
+    playerId !== "" &&
+    statId !== "" &&
+    valueField.value.trim() !== "" &&
+    Number.isFinite(value) &&
+    Number.isInteger(value) &&
+    value >= 0;
+
+  saveButton.disabled = !isValid;
+  saveButton.style.opacity = isValid ? "1" : "0.5";
+  saveButton.style.cursor = isValid ? "pointer" : "not-allowed";
+}
+
+// Check the fields whenever something changes.
+["gameSelect", "playerSelect", "statSelect", "statValue"]
+  .forEach(id => {
+    document.getElementById(id)
+      .addEventListener("change", validateStatEntry);
+  });
+
+document.getElementById("statValue")
+  .addEventListener("input", validateStatEntry);
+
+// Clear old values when switching games, players, or statistics.
+["gameSelect", "playerSelect", "statSelect"]
+  .forEach(id => {
+    document.getElementById(id)
+      .addEventListener("change", () => {
+        document.getElementById("statValue").value = "";
+        validateStatEntry();
+      });
+  });
+
 async function initializeStatsPage() {
   await checkStaffAccess();
 
