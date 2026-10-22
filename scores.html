@@ -63,6 +63,26 @@
     <select id="game-select" style="width:100%;padding:12px;margin-top:10px;">
       <option value="">Choose a game...</option>
     </select>
+ <div id="score-fields" hidden style="margin-top:25px;">
+  <h3>Enter Final Score</h3>
+
+  <label for="bm-score"><strong>Battle Mountain Score:</strong></label>
+  <input type="number" id="bm-score" min="0" step="1"
+    placeholder="Longhorns score"
+    style="width:100%;padding:12px;margin:10px 0 20px;">
+
+  <label for="opponent-score"><strong>Opponent Score:</strong></label>
+  <input type="number" id="opponent-score" min="0" step="1"
+    placeholder="Opponent score"
+    style="width:100%;padding:12px;margin:10px 0 20px;">
+
+  <button type="button" id="save-score"
+    style="background:#07532f;color:white;padding:14px 24px;border:0;border-radius:8px;cursor:pointer;">
+    Save Final Score
+  </button>
+
+  <p id="score-message" role="status"></p>
+</div>
   </div>
 </div>
   </main>
