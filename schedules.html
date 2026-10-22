@@ -303,6 +303,59 @@ async function showSelectedGame() {
 document.getElementById("game-select")
   .addEventListener("change", showSelectedGame);
 
+async function saveGameChanges() {
+  const gameId = document.getElementById("game-select").value;
+  const message = document.getElementById("edit-message");
+  const saveButton = document.getElementById("save-game");
+
+  if (!gameId) {
+    message.textContent = "Please select a game first.";
+    return;
+  }
+
+  const opponent = document.getElementById("edit-opponent").value.trim();
+  const location = document.getElementById("edit-location").value.trim();
+
+  if (!opponent) {
+    message.textContent = "Opponent cannot be empty.";
+    return;
+  }
+
+  saveButton.disabled = true;
+  message.textContent = "Saving changes...";
+
+  try {
+    const { data, error } = await db
+      .from("games")
+      .update({
+        opponent: opponent,
+        location: location || null
+      })
+      .eq("id", gameId)
+      .select("id,opponent,location")
+      .single();
+
+    if (error) throw error;
+
+    message.textContent = "Game changes saved successfully!";
+
+    await loadScheduleGames();
+    document.getElementById("game-select").value = gameId;
+
+    document.getElementById("selected-game-name").textContent =
+      document.getElementById("game-select")
+        .selectedOptions[0].textContent;
+
+  } catch (error) {
+    message.textContent = "Save failed: " + error.message;
+  } finally {
+    saveButton.disabled = false;
+  }
+}
+
+document.getElementById("save-game")
+  .addEventListener("click", saveGameChanges);
+
     checkScheduleAccess();
   </script>
 </body>
