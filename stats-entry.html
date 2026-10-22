@@ -392,6 +392,58 @@ document.getElementById("statValue")
       });
   });
 
+async function savePlayerStatistic() {
+  const button = document.getElementById("saveStatButton");
+  const message = document.getElementById("saveStatMessage");
+
+  const gameId = Number(document.getElementById("gameSelect").value);
+  const athleteId = Number(document.getElementById("playerSelect").value);
+  const statTypeId = Number(document.getElementById("statSelect").value);
+  const valueText = document.getElementById("statValue").value.trim();
+  const value = Number(valueText);
+
+  validateStatEntry();
+  if (button.disabled) return;
+
+  if (!Number.isSafeInteger(gameId) ||
+      !Number.isSafeInteger(athleteId) ||
+      !Number.isSafeInteger(statTypeId) ||
+      !Number.isSafeInteger(value) ||
+      value < 0) {
+    message.textContent = "Please enter valid statistics.";
+    return;
+  }
+
+  button.disabled = true;
+  message.textContent = "Saving statistic...";
+
+  const { error } = await db
+    .from("player_stats")
+    .upsert(
+      {
+        game_id: gameId,
+        athlete_id: athleteId,
+        stat_type_id: statTypeId,
+        value: value
+      },
+      {
+        onConflict: "game_id,athlete_id,stat_type_id"
+      }
+    );
+
+  if (error) {
+    console.error("Save error:", error);
+    message.textContent = "Unable to save: " + error.message;
+  } else {
+    message.textContent = "Statistic saved successfully!";
+  }
+
+  validateStatEntry();
+}
+
+document.getElementById("saveStatButton")
+  .addEventListener("click", savePlayerStatistic);
+
 async function initializeStatsPage() {
   await checkStaffAccess();
 
