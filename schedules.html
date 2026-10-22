@@ -355,11 +355,14 @@ async function loadScheduleGames() {
 
   const { data: games, error } = await db
     .from("games")
-    .select(`
-      id,
-      game_date,
-      opponent,
-      teams (
+  
+.select(`
+  id,
+  game_date,
+  opponent,
+  home_away,
+  teams (
+
         name,
         level,
        sports (id, name)
