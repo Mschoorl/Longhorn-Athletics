@@ -186,6 +186,19 @@ bmScore.value = selectedGame?.bm_score ?? "";
 opponentScore.value = selectedGame?.opponent_score ?? "";
 message.textContent = "";
 });
+  document.getElementById("save-score").addEventListener("click", async function () {
+  const gameId = document.getElementById("game-select").value;
+  const bmScore = document.getElementById("bm-score").value;
+  const opponentScore = document.getElementById("opponent-score").value;
+  const message = document.getElementById("score-message");
+
+  if (!gameId || bmScore === "" || opponentScore === "") {
+    message.textContent = "Please select a game and enter both scores.";
+    return;
+  }
+
+  message.textContent = "Score validation successful. Saving will be enabled next.";
+});
   checkScoreAccess();
 </script>
 </body>
