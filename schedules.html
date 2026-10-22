@@ -317,6 +317,64 @@ timeInput.disabled = tbdCheckbox.checked;
 document.getElementById("game-select")
   .addEventListener("change", showSelectedGame);
 
+function nevadaGameDateToUTC(date, time) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+
+  const localAsUTC = Date.UTC(
+    year, month - 1, day, hour, minute
+  );
+
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  });
+
+  function getOffset(timestamp) {
+    const parts = formatter.formatToParts(new Date(timestamp));
+    const value = type =>
+      Number(parts.find(p => p.type === type).value);
+
+    const displayedAsUTC = Date.UTC(
+      value("year"),
+      value("month") - 1,
+      value("day"),
+      value("hour"),
+      value("minute")
+    );
+
+    return displayedAsUTC - timestamp;
+  }
+
+  let timestamp = localAsUTC - getOffset(localAsUTC);
+  timestamp = localAsUTC - getOffset(timestamp);
+
+  const result = new Date(timestamp);
+
+  const actualLocal = formatter.formatToParts(result);
+  const actual = type =>
+    Number(actualLocal.find(p => p.type === type).value);
+
+  if (
+    actual("year") !== year ||
+    actual("month") !== month ||
+    actual("day") !== day ||
+    actual("hour") !== hour ||
+    actual("minute") !== minute
+  ) {
+    throw new Error(
+      "This local time does not exist due to daylight saving time. Choose another time."
+    );
+  }
+
+  return result.toISOString();
+}
+
 async function saveGameChanges() {
   const gameId = document.getElementById("game-select").value;
   const message = document.getElementById("edit-message");
