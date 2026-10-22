@@ -499,10 +499,22 @@ const time = game.time_tbd
       minute: "2-digit"
     });
 
-    const score = game.status === "Completed"
-      ? `FINAL: BM ${game.bm_score} - ${game.opponent_score} ${game.opponent}`
-      : game.status;
+   const hasFinalScore =
+  game.status === "Completed" &&
+  game.bm_score !== null &&
+  game.opponent_score !== null;
 
+const gameHasPassed = gameDate < now;
+
+let score;
+
+if (hasFinalScore) {
+  score = `FINAL: BM ${game.bm_score} - ${game.opponent_score} ${game.opponent}`;
+} else if (gameHasPassed) {
+  score = "Result Pending";
+} else {
+  score = game.status || "Scheduled";
+}
   
 
 entry.className = "schedule-game";
