@@ -478,6 +478,17 @@ document.getElementById("edit-time-tbd")
       this.checked;
   });
 
+document.getElementById("show-new-game")
+  .addEventListener("click", function () {
+    const form = document.getElementById("new-game-form");
+
+    form.hidden = !form.hidden;
+
+    this.textContent = form.hidden
+      ? "+ Add New Game"
+      : "− Close New Game Form";
+  });
+
     checkScheduleAccess();
   </script>
 </body>
