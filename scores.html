@@ -197,7 +197,57 @@ message.textContent = "";
     return;
   }
 
-  message.textContent = "Score validation successful. Saving will be enabled next.";
+const finalBmScore = Number(bmScore);
+const finalOpponentScore = Number(opponentScore);
+
+if (
+  !Number.isSafeInteger(finalBmScore) ||
+  !Number.isSafeInteger(finalOpponentScore) ||
+  finalBmScore < 0 ||
+  finalOpponentScore < 0
+) {
+  message.textContent = "Please enter valid, nonnegative whole-number scores.";
+  return;
+}
+
+const saveButton = document.getElementById("save-score");
+saveButton.disabled = true;
+message.textContent = "Saving final score...";
+
+try {
+  const { data, error } = await db
+    .from("games")
+    .update({
+      bm_score: finalBmScore,
+      opponent_score: finalOpponentScore,
+      status: "Completed"
+    })
+    .eq("id", gameId)
+    .select("id, bm_score, opponent_score, status");
+
+  if (error) throw error;
+
+  if (!data || data.length !== 1) {
+    throw new Error("Score was not updated. Check administrator permissions.");
+  }
+
+  const savedGame = scoreGames.find(
+    game => String(game.id) === String(gameId)
+  );
+
+  if (savedGame) {
+    savedGame.bm_score = finalBmScore;
+    savedGame.opponent_score = finalOpponentScore;
+    savedGame.status = "Completed";
+  }
+
+  message.textContent = "Final score saved successfully!";
+} catch (error) {
+  console.error("Score save error:", error);
+  message.textContent = "Unable to save score: " + error.message;
+} finally {
+  saveButton.disabled = false;
+}
 });
   checkScoreAccess();
 </script>
