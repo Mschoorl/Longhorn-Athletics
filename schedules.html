@@ -457,6 +457,9 @@ async function showSelectedGame() {
   document.getElementById("edit-opponent").value =
     game.opponent || "";
 
+document.getElementById("edit-home-away").value =
+  game.home_away || "Home";
+
   document.getElementById("edit-date").value =
     `${part("year")}-${part("month")}-${part("day")}`;
 
