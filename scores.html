@@ -57,6 +57,33 @@
       <p id="status">Score entry setup in progress.</p>
     </div>
   </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
+<script>
+  const SUPABASE_URL = "https://zwbjethanfvgqknngcii.supabase.co";
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_k7rAGIWYj_t_BmDfbwp42w_Yj375UCa";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  async function checkScoreAccess() {
+    const status = document.getElementById("status");
+
+    const { data: { user }, error } = await db.auth.getUser();
+
+    if (error || !user) {
+      status.textContent = "Please sign in to access game scores.";
+      return;
+    }
+
+    status.textContent = "Signed in. Checking score-entry permissions...";
+  }
+
+  checkScoreAccess();
+</script>
 </body>
 </html>
