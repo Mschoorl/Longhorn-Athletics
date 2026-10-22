@@ -755,6 +755,12 @@ async function loadSportFilter() {
   }
 }
 
+document.getElementById("sport-filter")
+  .addEventListener("change", async function () {
+    document.getElementById("game-details").hidden = true;
+    await loadScheduleGames();
+  });
+
     checkScheduleAccess();
   </script>
 </body>
