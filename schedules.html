@@ -336,7 +336,7 @@ async function loadScheduleGames() {
       teams (
         name,
         level,
-        sports (name)
+       sports (id, name)
       )
     `)
     .order("game_date", { ascending: false });
@@ -348,7 +348,17 @@ async function loadScheduleGames() {
     return;
   }
 
-  for (const game of games) {
+const selectedSportId =
+  document.getElementById("sport-filter").value;
+
+const filteredGames = games.filter(game => {
+  if (!selectedSportId) return true;
+
+  return String(game.teams?.sports?.id) ===
+    String(selectedSportId);
+});
+
+for (const game of filteredGames) {
     const option = document.createElement("option");
     option.value = game.id;
 
