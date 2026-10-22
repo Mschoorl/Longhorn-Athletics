@@ -52,10 +52,19 @@
   <main>
     <p><a href="admin.html">← Back to Athletic Director Dashboard</a></p>
 
-    <div class="card">
-      <h2>Manage Game Results</h2>
-      <p id="status">Score entry setup in progress.</p>
-    </div>
+<div class="card">
+  <h2>Manage Game Results</h2>
+
+  <p id="status">Checking administrator access...</p>
+
+  <div id="score-form" hidden>
+    <label for="game-select"><strong>Select a Game:</strong></label>
+
+    <select id="game-select" style="width:100%;padding:12px;margin-top:10px;">
+      <option value="">Choose a game...</option>
+    </select>
+  </div>
+</div>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
