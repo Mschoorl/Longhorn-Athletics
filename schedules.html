@@ -352,7 +352,9 @@ async function loadScheduleGames() {
        sports (id, name)
       )
     `)
-    .order("game_date", { ascending: false });
+  
+.order("game_date", { ascending: true });
+
 
   if (error) {
     console.error("Error loading games:", error);
