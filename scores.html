@@ -97,8 +97,57 @@ if (roleError || isAdmin !== true) {
 }
 
 status.textContent = "Access verified! Welcome to Game Scores.";
+    document.getElementById("score-form").hidden = false;
+await loadScoreGames();
+  }
+async function loadScoreGames() {
+  const gameSelect = document.getElementById("game-select");
+
+  gameSelect.innerHTML = '<option value="">Choose a game...</option>';
+
+  const { data, error } = await db
+    .from("games")
+    .select(`
+      id,
+      game_date,
+      opponent,
+      status,
+      teams (
+        name,
+        level,
+        sports (
+          name
+        )
+      )
+    `)
+    .order("game_date", { ascending: false });
+
+  if (error) {
+    console.error("Error loading games:", error);
+    gameSelect.innerHTML =
+      '<option value="">Unable to load games</option>';
+    return;
   }
 
+  data.forEach(game => {
+    const sport = game.teams?.sports?.name || "Unknown Sport";
+    const level = game.teams?.level || "Varsity";
+
+    const date = new Date(game.game_date).toLocaleDateString("en-US", {
+      timeZone: "America/Los_Angeles",
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+
+    const option = document.createElement("option");
+    option.value = game.id;
+    option.textContent =
+      `${sport} | ${level} | ${date} | vs. ${game.opponent}`;
+
+    gameSelect.appendChild(option);
+  });
+}
   checkScoreAccess();
 </script>
 </body>
