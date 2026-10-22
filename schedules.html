@@ -618,6 +618,20 @@ async function loadNewGameTeams() {
   }
 }
 
+document.getElementById("new-game-time-tbd")
+  .addEventListener("change", function () {
+
+    const timeInput =
+      document.getElementById("new-game-time");
+
+    timeInput.disabled = this.checked;
+
+    if (this.checked) {
+      timeInput.value = "";
+    }
+
+  });
+
     checkScheduleAccess();
   </script>
 </body>
