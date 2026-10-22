@@ -233,6 +233,7 @@
 document.getElementById("schedule-form").hidden = false;
       document.getElementById("new-game-section").hidden = false;
 await loadScheduleGames();
+      await loadNewGameTeams();
     }
 
 async function loadScheduleGames() {
@@ -501,6 +502,48 @@ document.getElementById("show-new-game")
       ? "+ Add New Game"
       : "− Close New Game Form";
   });
+
+async function loadNewGameTeams() {
+  const dropdown = document.getElementById("new-game-team");
+  const message = document.getElementById("new-game-message");
+
+  dropdown.innerHTML =
+    '<option value="">Choose a team...</option>';
+
+  const { data: teams, error } = await db
+    .from("teams")
+    .select(`
+      id,
+      name,
+      level,
+      sports (name)
+    `)
+    .order("name", { ascending: true });
+
+  if (error) {
+    message.textContent =
+      "Could not load teams: " + error.message;
+    return;
+  }
+
+  teams.sort((a, b) => {
+    const nameA = a.sports?.name || a.name;
+    const nameB = b.sports?.name || b.name;
+
+    return nameA.localeCompare(nameB) ||
+      (a.level || "").localeCompare(b.level || "");
+  });
+
+  for (const team of teams) {
+    const option = document.createElement("option");
+
+    option.value = team.id;
+    option.textContent =
+      `${team.sports?.name || team.name} — ${team.level || "Team"}`;
+
+    dropdown.appendChild(option);
+  }
+}
 
     checkScheduleAccess();
   </script>
