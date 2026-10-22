@@ -298,6 +298,12 @@ async function showSelectedGame() {
           hourCycle: "h23"
         }).format(gameDate);
 
+const tbdCheckbox = document.getElementById("edit-time-tbd");
+const timeInput = document.getElementById("edit-time");
+
+tbdCheckbox.checked = game.time_tbd === true;
+timeInput.disabled = tbdCheckbox.checked;
+
   document.getElementById("edit-location").value =
     game.location || "";
 
@@ -363,6 +369,12 @@ async function saveGameChanges() {
 
 document.getElementById("save-game")
   .addEventListener("click", saveGameChanges);
+
+document.getElementById("edit-time-tbd")
+  .addEventListener("change", function () {
+    document.getElementById("edit-time").disabled =
+      this.checked;
+  });
 
     checkScheduleAccess();
   </script>
