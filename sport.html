@@ -350,7 +350,37 @@ const time = game.time_tbd
       : game.status;
 
   
-entry.textContent = `${date} at ${time} • ${game.home_away} vs. ${game.opponent} • ${score}`;
+
+entry.className = "schedule-game";
+entry.style.padding = "14px";
+entry.style.marginBottom = "10px";
+entry.style.border = "1px solid #e0e0e0";
+entry.style.borderLeft = "4px solid #e9b83f";
+entry.style.borderRadius = "8px";
+entry.style.backgroundColor = "#ffffff";
+
+const opponent = document.createElement("strong");
+opponent.textContent = game.opponent;
+opponent.style.display = "block";
+opponent.style.color = "#07532f";
+opponent.style.fontSize = "17px";
+opponent.style.marginBottom = "6px";
+
+const details = document.createElement("span");
+details.textContent = `${date} • ${time} • ${game.home_away}`;
+details.style.display = "block";
+details.style.marginBottom = "6px";
+
+const result = document.createElement("span");
+result.textContent = score;
+result.style.display = "block";
+result.style.fontSize = "13px";
+result.style.color = "#555555";
+
+entry.appendChild(opponent);
+entry.appendChild(details);
+entry.appendChild(result);
+
 
 
 if (game.teams.level === "Varsity") {
