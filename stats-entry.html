@@ -455,6 +455,81 @@ async function savePlayerStatistic() {
 document.getElementById("saveStatButton")
   .addEventListener("click", savePlayerStatistic);
 
+async function loadExistingStats() {
+  const gameId = document.getElementById("gameSelect").value;
+  const playerId = document.getElementById("playerSelect").value;
+
+  const section = document.getElementById("existingStatsSection");
+  const list = document.getElementById("existingStatsList");
+
+  section.style.display = "none";
+  list.textContent = "";
+
+  if (!gameId || !playerId) return;
+
+  section.style.display = "block";
+  list.textContent = "Loading saved statistics...";
+
+  const { data: stats, error } = await db
+    .from("player_stats")
+    .select("id, value, stat_types(name)")
+    .eq("game_id", gameId)
+    .eq("athlete_id", playerId)
+    .order("id");
+
+  if (error) {
+    console.error("Error loading saved statistics:", error);
+    list.textContent = "Unable to load statistics: " + error.message;
+    return;
+  }
+
+  if (!stats || stats.length === 0) {
+    list.textContent = "No statistics entered for this player yet.";
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+
+  const header = table.insertRow();
+  ["Statistic", "Value"].forEach(label => {
+    const cell = document.createElement("th");
+    cell.textContent = label;
+    cell.style.padding = "10px";
+    cell.style.textAlign = "left";
+    cell.style.borderBottom = "2px solid #0b5132";
+    header.appendChild(cell);
+  });
+
+  stats.forEach(stat => {
+    const row = table.insertRow();
+
+    const nameCell = row.insertCell();
+    nameCell.textContent = stat.stat_types?.name || "Unknown Statistic";
+
+    const valueCell = row.insertCell();
+    valueCell.textContent = stat.value;
+
+    [nameCell, valueCell].forEach(cell => {
+      cell.style.padding = "10px";
+      cell.style.borderBottom = "1px solid #ddd";
+    });
+  });
+
+  list.replaceChildren(table);
+}
+
+// Refresh saved statistics when a player is selected.
+document.getElementById("playerSelect")
+  .addEventListener("change", loadExistingStats);
+
+// Clear the previous player's statistics when games change.
+document.getElementById("gameSelect")
+  .addEventListener("change", () => {
+    document.getElementById("existingStatsSection").style.display = "none";
+  });
+
 async function initializeStatsPage() {
   await checkStaffAccess();
 
