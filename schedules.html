@@ -231,6 +231,69 @@ async function loadScheduleGames() {
   }
 }
 
+async function showSelectedGame() {
+  const gameId = document.getElementById("game-select").value;
+  const details = document.getElementById("game-details");
+  const message = document.getElementById("edit-message");
+
+  details.hidden = true;
+  message.textContent = "";
+
+  if (!gameId) return;
+
+  const { data: game, error } = await db
+    .from("games")
+    .select("id,opponent,game_date,location,time_tbd")
+    .eq("id", gameId)
+    .single();
+
+  if (error) {
+    message.textContent = "Unable to load game: " + error.message;
+    details.hidden = false;
+    return;
+  }
+
+  const gameDate = new Date(game.game_date);
+
+  const dateParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(gameDate);
+
+  const part = type =>
+    dateParts.find(item => item.type === type)?.value;
+
+  document.getElementById("edit-opponent").value =
+    game.opponent || "";
+
+  document.getElementById("edit-date").value =
+    `${part("year")}-${part("month")}-${part("day")}`;
+
+  document.getElementById("edit-time").value =
+    game.time_tbd
+      ? ""
+      : new Intl.DateTimeFormat("en-GB", {
+          timeZone: "America/Los_Angeles",
+          hour: "2-digit",
+          minute: "2-digit",
+          hourCycle: "h23"
+        }).format(gameDate);
+
+  document.getElementById("edit-location").value =
+    game.location || "";
+
+  document.getElementById("selected-game-name").textContent =
+    document.getElementById("game-select")
+      .selectedOptions[0].textContent;
+
+  details.hidden = false;
+}
+
+document.getElementById("game-select")
+  .addEventListener("change", showSelectedGame);
+
     checkScheduleAccess();
   </script>
 </body>
