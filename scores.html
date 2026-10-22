@@ -168,6 +168,18 @@ async function loadScoreGames() {
     gameSelect.appendChild(option);
   });
 }
+  document.getElementById("game-select").addEventListener("change", function () {
+  const scoreFields = document.getElementById("score-fields");
+  const bmScore = document.getElementById("bm-score");
+  const opponentScore = document.getElementById("opponent-score");
+  const message = document.getElementById("score-message");
+
+  scoreFields.hidden = !this.value;
+
+  bmScore.value = "";
+  opponentScore.value = "";
+  message.textContent = "";
+});
   checkScoreAccess();
 </script>
 </body>
