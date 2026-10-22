@@ -318,6 +318,7 @@ document.getElementById("schedule-form").hidden = false;
       document.getElementById("new-game-section").hidden = false;
 await loadScheduleGames();
       await loadNewGameTeams();
+      await loadSportFilter();
     }
 
 async function loadScheduleGames() {
@@ -716,6 +717,33 @@ async function createNewGame() {
 
 document.getElementById("create-game")
   .addEventListener("click", createNewGame);
+
+async function loadSportFilter() {
+  const dropdown = document.getElementById("sport-filter");
+
+  dropdown.innerHTML = '<option value="">All Sports</option>';
+
+  const { data: sports, error } = await db
+    .from("sports")
+    .select("id,name")
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Could not load sports:", error);
+    document.getElementById("status").textContent =
+      "Could not load sports: " + error.message;
+    return;
+  }
+
+  for (const sport of sports) {
+    const option = document.createElement("option");
+
+    option.value = sport.id;
+    option.textContent = sport.name;
+
+    dropdown.appendChild(option);
+  }
+}
 
     checkScheduleAccess();
   </script>
