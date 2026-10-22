@@ -423,7 +423,26 @@ if (error) {
 
 varsityGames.replaceChildren();
 jvGames.replaceChildren();
+const varsityUpcoming = document.createElement("div");
+const varsityPast = document.createElement("div");
+const jvUpcoming = document.createElement("div");
+const jvPast = document.createElement("div");
 
+function addScheduleSections(container, upcoming, past) {
+  const upcomingTitle = document.createElement("h4");
+  upcomingTitle.textContent = "Upcoming Games";
+
+  const pastTitle = document.createElement("h4");
+  pastTitle.textContent = "Past Games & Results";
+
+  container.appendChild(upcomingTitle);
+  container.appendChild(upcoming);
+  container.appendChild(pastTitle);
+  container.appendChild(past);
+}
+
+addScheduleSections(varsityGames, varsityUpcoming, varsityPast);
+addScheduleSections(jvGames, jvUpcoming, jvPast);
 if (!data.length) {
   varsityGames.textContent = "No Varsity games posted yet.";
   jvGames.textContent = "No JV games posted yet.";
