@@ -535,6 +535,52 @@ document.getElementById("gameSelect")
     document.getElementById("existingStatsSection").style.display = "none";
   });
 
+async function loadSavedStatValue() {
+  const gameId = document.getElementById("gameSelect").value;
+  const athleteId = document.getElementById("playerSelect").value;
+  const statTypeId = document.getElementById("statSelect").value;
+  const valueField = document.getElementById("statValue");
+  const message = document.getElementById("saveStatMessage");
+
+  valueField.value = "";
+  message.textContent = "";
+  validateStatEntry();
+
+  if (!gameId || !athleteId || !statTypeId) return;
+
+  const { data, error } = await db
+    .from("player_stats")
+    .select("value")
+    .eq("game_id", gameId)
+    .eq("athlete_id", athleteId)
+    .eq("stat_type_id", statTypeId)
+    .maybeSingle();
+
+  // Ignore results if the user changed selections while loading.
+  if (
+    document.getElementById("gameSelect").value !== gameId ||
+    document.getElementById("playerSelect").value !== athleteId ||
+    document.getElementById("statSelect").value !== statTypeId
+  ) return;
+
+  if (error) {
+    message.textContent =
+      "Unable to check existing statistic: " + error.message;
+    return;
+  }
+
+  if (data) {
+    valueField.value = data.value;
+    message.textContent =
+      "Existing value loaded. You can update it.";
+  }
+
+  validateStatEntry();
+}
+
+document.getElementById("statSelect")
+  .addEventListener("change", loadSavedStatValue);
+
 async function initializeStatsPage() {
   await checkStaffAccess();
 
