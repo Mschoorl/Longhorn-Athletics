@@ -47,6 +47,21 @@
 
 <p id="gameMessage">Choose a game to begin entering statistics.</p>
 
+<div id="playerSection" style="display:none; margin-top:20px;">
+  <label for="playerSelect">
+    <strong>Select Player:</strong>
+  </label>
+
+  <select id="playerSelect"
+    style="display:block; width:100%; padding:12px; margin-top:10px;">
+    <option value="">-- Select a Player --</option>
+  </select>
+
+  <p id="playerMessage">
+    Select a player to enter statistics.
+  </p>
+</div>
+
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
