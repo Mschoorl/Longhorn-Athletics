@@ -69,6 +69,7 @@
     }
   </style>
 
+<script>
 async function loadPublicPlayerStats() {
   const message = document.getElementById("playerStatsMessage");
   const container = document.getElementById("playerStatsContainer");
@@ -178,7 +179,7 @@ async function loadPublicPlayerStats() {
   container.replaceChildren(table);
   message.textContent = "";
 }
-
+</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 
@@ -213,7 +214,7 @@ async function loadPublicPlayerStats() {
 </div>
 
     <div class="card">
-      <h2>Player Statistics</h2>
+    
       
 <section id="playerStatsSection" style="margin-top:30px;">
   <h2>Player Statistics</h2>
@@ -431,13 +432,13 @@ if (sportId === 1) {
 }
 
 
+
 loadSport();
 displaySportRosters();
 loadPublicPlayerStats();
 
 </script>
 
-  </script>
-<!-- Longhorn Athletics deployment refresh -->  
+<!-- Longhorn Athletics deployment refresh -->
 </body>
 </html>
