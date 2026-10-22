@@ -98,7 +98,7 @@
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
-
+let scoreGames = [];
   async function checkScoreAccess() {
     const status = document.getElementById("status");
 
@@ -150,7 +150,7 @@ teams (
       '<option value="">Unable to load games</option>';
     return;
   }
-
+scoreGames = data || [];
   data.forEach(game => {
     const sport = game.teams?.sports?.name || "Unknown Sport";
     const level = game.teams?.level || "Varsity";
@@ -178,9 +178,13 @@ teams (
 
   scoreFields.hidden = !this.value;
 
-  bmScore.value = "";
-  opponentScore.value = "";
-  message.textContent = "";
+const selectedGame = scoreGames.find(
+  game => String(game.id) === this.value
+);
+
+bmScore.value = selectedGame?.bm_score ?? "";
+opponentScore.value = selectedGame?.opponent_score ?? "";
+message.textContent = "";
 });
   checkScoreAccess();
 </script>
