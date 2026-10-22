@@ -80,7 +80,14 @@
       return;
     }
 
-    status.textContent = "Signed in. Checking score-entry permissions...";
+ const { data: isAdmin, error: roleError } = await db.rpc("is_super_admin");
+
+if (roleError || isAdmin !== true) {
+  status.textContent = "Access denied. Athletic Director permission required.";
+  return;
+}
+
+status.textContent = "Access verified! Welcome to Game Scores.";
   }
 
   checkScoreAccess();
