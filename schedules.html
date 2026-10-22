@@ -81,6 +81,55 @@
     <option value="">Choose a game...</option>
   </select>
 
+<div id="game-details" hidden style="margin-top:25px;">
+
+  <h3>Edit Game Details</h3>
+
+  <p>
+    <strong>Selected Game:</strong>
+    <span id="selected-game-name">None</span>
+  </p>
+
+  <label for="edit-opponent">
+    <strong>Opponent</strong>
+  </label>
+  <input
+    type="text"
+    id="edit-opponent"
+    style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0 18px;"
+  >
+
+  <label for="edit-date">
+    <strong>Game Date</strong>
+  </label>
+  <input
+    type="date"
+    id="edit-date"
+    style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0 18px;"
+  >
+
+  <label for="edit-time">
+    <strong>Game Time</strong>
+  </label>
+  <input
+    type="time"
+    id="edit-time"
+    style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0 18px;"
+  >
+
+  <label for="edit-location">
+    <strong>Location</strong>
+  </label>
+  <input
+    type="text"
+    id="edit-location"
+    style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0 18px;"
+  >
+
+  <p id="edit-message" role="status"></p>
+
+</div>
+
 </div>
 
     </div>
