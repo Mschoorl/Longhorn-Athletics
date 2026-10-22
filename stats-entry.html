@@ -150,6 +150,77 @@ async function loadGames() {
     "Choose a game to begin entering statistics.";
 }
 
+async function loadPlayersForGame() {
+  const gameSelect = document.getElementById("gameSelect");
+  const playerSection = document.getElementById("playerSection");
+  const playerSelect = document.getElementById("playerSelect");
+  const playerMessage = document.getElementById("playerMessage");
+
+  const gameId = gameSelect.value;
+
+  playerSection.style.display = "none";
+  playerSelect.innerHTML =
+    '<option value="">-- Select a Player --</option>';
+
+  if (!gameId) return;
+
+  playerSection.style.display = "block";
+  playerMessage.textContent = "Loading players...";
+
+  // Find the team associated with this game.
+  const { data: game, error: gameError } = await db
+    .from("games")
+    .select("team_id")
+    .eq("id", gameId)
+    .single();
+
+  if (gameError || !game) {
+    playerMessage.textContent = "Unable to find the game's team.";
+    return;
+  }
+
+  // Load players from that team's roster.
+  const { data: roster, error: rosterError } = await db
+    .from("team_rosters")
+    .select("athlete_id, jersey_number, athletes(first_name, last_name)")
+    .eq("team_id", game.team_id);
+
+  if (rosterError) {
+    console.error(rosterError);
+    playerMessage.textContent =
+      "Unable to load players: " + rosterError.message;
+    return;
+  }
+
+  if (!roster || roster.length === 0) {
+    playerMessage.textContent = "No players found on this roster.";
+    return;
+  }
+
+  roster.sort((a, b) =>
+    Number(a.jersey_number || 0) - Number(b.jersey_number || 0)
+  );
+
+  roster.forEach(player => {
+    if (!player.athletes) return;
+
+    const option = document.createElement("option");
+    option.value = player.athlete_id;
+    option.textContent =
+      `#${player.jersey_number || "—"} ` +
+      `${player.athletes.first_name} ${player.athletes.last_name}`;
+
+    playerSelect.appendChild(option);
+  });
+
+  playerMessage.textContent =
+    "Select a player to enter statistics.";
+}
+
+// Reload the roster whenever a different game is selected.
+document.getElementById("gameSelect")
+  .addEventListener("change", loadPlayersForGame);
+
 async function initializeStatsPage() {
   await checkStaffAccess();
 
