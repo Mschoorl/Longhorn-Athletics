@@ -68,6 +68,50 @@
       <h2>Schedule Management</h2>
       <p id="status">Page setup in progress.</p>
     </div>
+
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+  <script>
+    const SUPABASE_URL =
+      "https://zwbjethanfvgqknngcii.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_k7rAGIWYj_t_BmDfbwp42w_Yj375UCa";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    async function checkScheduleAccess() {
+      const status = document.getElementById("status");
+      status.textContent = "Checking administrator access...";
+
+      const { data: { user }, error } =
+        await db.auth.getUser();
+
+      if (error || !user) {
+        status.textContent =
+          "Please sign in to manage schedules.";
+        return;
+      }
+
+      const { data: isAdmin, error: roleError } =
+        await db.rpc("is_super_admin");
+
+      if (roleError || isAdmin !== true) {
+        status.textContent =
+          "Access denied. Athletic Director permission required.";
+        return;
+      }
+
+      status.textContent =
+        "Access verified! Welcome to Schedule Management.";
+    }
+
+    checkScheduleAccess();
+  </script>
 </body>
 </html>
