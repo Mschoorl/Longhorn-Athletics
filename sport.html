@@ -524,10 +524,20 @@ entry.appendChild(result);
 
 
 
+const isUpcoming = gameDate >= now;
+
 if (game.teams.level === "Varsity") {
-  varsityGames.appendChild(entry);
+  if (isUpcoming) {
+    varsityUpcoming.appendChild(entry);
+  } else {
+    varsityPast.appendChild(entry);
+  }
 } else if (game.teams.level === "JV") {
-  jvGames.appendChild(entry);
+  if (isUpcoming) {
+    jvUpcoming.appendChild(entry);
+  } else {
+    jvPast.appendChild(entry);
+  }
 }
 
 
