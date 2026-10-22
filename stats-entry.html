@@ -91,7 +91,61 @@ async function checkStaffAccess() {
   main.style.display = "block";
 }
 
-checkStaffAccess();
+
+async function loadGames() {
+  const gameSelect = document.getElementById("gameSelect");
+  const gameMessage = document.getElementById("gameMessage");
+
+  const { data: games, error } = await db
+    .from("games")
+    .select("id, opponent, game_date, teams(name)")
+    .order("game_date", { ascending: false });
+
+  if (error) {
+    console.error("Error loading games:", error);
+    gameSelect.innerHTML =
+      '<option value="">Unable to load games</option>';
+    gameMessage.textContent = "Error loading games: " + error.message;
+    return;
+  }
+
+  gameSelect.innerHTML =
+    '<option value="">-- Select a Game --</option>';
+
+  if (!games || games.length === 0) {
+    gameMessage.textContent = "No games found.";
+    return;
+  }
+
+  games.forEach(game => {
+    const option = document.createElement("option");
+    option.value = game.id;
+
+    const teamName = game.teams?.name || "Team";
+    const gameDate = new Date(game.game_date)
+      .toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" });
+
+    option.textContent =
+      `${teamName} vs. ${game.opponent} — ${gameDate}`;
+
+    gameSelect.appendChild(option);
+  });
+
+  gameMessage.textContent =
+    "Choose a game to begin entering statistics.";
+}
+
+async function initializeStatsPage() {
+  await checkStaffAccess();
+
+  if (document.querySelector("main").style.display === "block" &&
+      !document.querySelector("main").textContent.includes("Access denied")) {
+    await loadGames();
+  }
+}
+
+initializeStatsPage();
+
 
 </script>
 
