@@ -364,11 +364,20 @@ async function loadScheduleGames() {
 const selectedSportId =
   document.getElementById("sport-filter").value;
 
-const filteredGames = games.filter(game => {
-  if (!selectedSportId) return true;
+const selectedLevel =
+  document.getElementById("level-filter").value;
 
-  return String(game.teams?.sports?.id) ===
-    String(selectedSportId);
+
+const filteredGames = games.filter(game => {
+  const matchesSport =
+    !selectedSportId ||
+    String(game.teams?.sports?.id) === String(selectedSportId);
+
+  const matchesLevel =
+    !selectedLevel ||
+    game.teams?.level === selectedLevel;
+
+  return matchesSport && matchesLevel;
 });
 
 for (const game of filteredGames) {
@@ -769,6 +778,12 @@ async function loadSportFilter() {
 }
 
 document.getElementById("sport-filter")
+  .addEventListener("change", async function () {
+    document.getElementById("game-details").hidden = true;
+    await loadScheduleGames();
+  });
+
+document.getElementById("level-filter")
   .addEventListener("change", async function () {
     document.getElementById("game-details").hidden = true;
     await loadScheduleGames();
