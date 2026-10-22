@@ -429,7 +429,24 @@ if (!data.length) {
   jvGames.textContent = "No JV games posted yet.";
   return;
 }
+const now = new Date();
 
+data.sort((a, b) => {
+  const dateA = new Date(a.game_date);
+  const dateB = new Date(b.game_date);
+
+  const aUpcoming = dateA >= now;
+  const bUpcoming = dateB >= now;
+
+  if (aUpcoming && !bUpcoming) return -1;
+  if (!aUpcoming && bUpcoming) return 1;
+
+  if (aUpcoming) {
+    return dateA - dateB;
+  }
+
+  return dateB - dateA;
+});
   data.forEach(game => {
     const entry = document.createElement("p");
   
