@@ -200,10 +200,23 @@ async function loadPublicPlayerStats() {
 
   <main>
   
+
 <div class="card">
-<h2>Schedule &amp; Scores</h2>
-<div id="sport-games">Loading Longhorn games...</div>
+  <h2>Schedule &amp; Scores</h2>
+
+  <h3>Varsity Schedule</h3>
+  <div id="varsity-games">
+    Loading Varsity schedule...
+  </div>
+
+  <hr>
+
+  <h3>Junior Varsity Schedule</h3>
+  <div id="jv-games">
+    Loading JV schedule...
+  </div>
 </div>
+
  
 
     
@@ -279,30 +292,38 @@ async function loadPublicPlayerStats() {
 async function loadSportGames() {
   const params = new URLSearchParams(window.location.search);
   const sportId = params.get("id");
-  const gamesList = document.getElementById("sport-games");
 
-  if (!gamesList || !sportId) return;
+const varsityGames = document.getElementById("varsity-games");
+const jvGames = document.getElementById("jv-games");
+
+
+if (!varsityGames || !jvGames || !sportId) return;
 
   const { data, error } = await db
     .from("games")
    
-.select("opponent, game_date, time_tbd, location, home_away, status, bm_score, opponent_score, teams!inner(name, sport_id)")
+
+.select("opponent, game_date, time_tbd, location, home_away, status, bm_score, opponent_score, teams!inner(name, sport_id, level)")
 
     .eq("teams.sport_id", sportId)
     .order("game_date", { ascending: false });
 
-  if (error) {
-    gamesList.textContent = "Unable to load schedule.";
-    console.error("Sport games error:", error.message);
-    return;
-  }
+ 
+if (error) {
+  varsityGames.textContent = "Unable to load schedule.";
+  jvGames.textContent = "Unable to load schedule.";
+  console.error("Sport games error:", error.message);
+  return;
+}
 
-  gamesList.replaceChildren();
+varsityGames.replaceChildren();
+jvGames.replaceChildren();
 
-  if (!data.length) {
-    gamesList.textContent = "No games posted yet.";
-    return;
-  }
+if (!data.length) {
+  varsityGames.textContent = "No Varsity games posted yet.";
+  jvGames.textContent = "No JV games posted yet.";
+  return;
+}
 
   data.forEach(game => {
     const entry = document.createElement("p");
@@ -331,10 +352,28 @@ const time = game.time_tbd
   
 entry.textContent = `${date} at ${time} • ${game.home_away} vs. ${game.opponent} • ${score}`;
 
-    gamesList.appendChild(entry);
-  });
+
+if (game.teams.level === "Varsity") {
+  varsityGames.appendChild(entry);
+} else if (game.teams.level === "JV") {
+  jvGames.appendChild(entry);
 }
+
+
+});
+
+if (!varsityGames.children.length) {
+  varsityGames.textContent = "No Varsity games posted yet.";
+}
+
+if (!jvGames.children.length) {
+  jvGames.textContent = "No JV games posted yet.";
+}
+
+}
+
 loadSportGames();
+
 
 
 async function displaySportRosters() {
