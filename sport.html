@@ -432,13 +432,26 @@ function addScheduleSections(container, upcoming, past) {
   const upcomingTitle = document.createElement("h4");
   upcomingTitle.textContent = "Upcoming Games";
 
-  const pastTitle = document.createElement("h4");
-  pastTitle.textContent = "Past Games & Results";
+ const pastDropdown = document.createElement("details");
+pastDropdown.style.marginTop = "20px";
 
-  container.appendChild(upcomingTitle);
-  container.appendChild(upcoming);
-  container.appendChild(pastTitle);
-  container.appendChild(past);
+const pastTitle = document.createElement("summary");
+pastTitle.textContent = "Past Games & Results";
+pastTitle.style.cursor = "pointer";
+pastTitle.style.fontWeight = "bold";
+pastTitle.style.fontSize = "16px";
+pastTitle.style.color = "#07532f";
+pastTitle.style.padding = "12px";
+pastTitle.style.backgroundColor = "#f5f7f4";
+pastTitle.style.border = "1px solid #dddddd";
+pastTitle.style.borderRadius = "8px";
+
+pastDropdown.appendChild(pastTitle);
+pastDropdown.appendChild(past);
+
+container.appendChild(upcomingTitle);
+container.appendChild(upcoming);
+container.appendChild(pastDropdown);
 }
 
 addScheduleSections(varsityGames, varsityUpcoming, varsityPast);
