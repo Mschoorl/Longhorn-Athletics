@@ -542,7 +542,11 @@ result.textContent = score;
 result.style.display = "block";
 result.style.fontSize = "13px";
 result.style.color = "#555555";
-
+if (hasFinalScore) {
+  result.style.fontWeight = "bold";
+  result.style.fontSize = "16px";
+  result.style.color = "#07532f";
+}
 entry.appendChild(opponent);
 entry.appendChild(details);
 entry.appendChild(result);
