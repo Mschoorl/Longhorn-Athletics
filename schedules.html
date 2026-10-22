@@ -388,6 +388,15 @@ async function saveGameChanges() {
   const opponent = document.getElementById("edit-opponent").value.trim();
   const location = document.getElementById("edit-location").value.trim();
 
+const date = document.getElementById("edit-date").value;
+const time = document.getElementById("edit-time").value;
+const timeTBD = document.getElementById("edit-time-tbd").checked;
+
+if (!date || (!timeTBD && !time)) {
+  message.textContent = "Please enter a game date and time, or mark the time TBD.";
+  return;
+}
+
   if (!opponent) {
     message.textContent = "Opponent cannot be empty.";
     return;
@@ -397,12 +406,21 @@ async function saveGameChanges() {
   message.textContent = "Saving changes...";
 
   try {
-    const { data, error } = await db
-      .from("games")
-      .update({
-        opponent: opponent,
-        location: location || null
-      })
+  
+const gameDateUTC = nevadaGameDateToUTC(
+  date,
+  timeTBD ? "12:00" : time
+);
+
+const { data, error } = await db
+  .from("games")
+  .update({
+    opponent: opponent,
+    location: location || null,
+    game_date: gameDateUTC,
+    time_tbd: timeTBD
+  })
+
       .eq("id", gameId)
       .select("id,opponent,location")
       .single();
