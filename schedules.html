@@ -647,7 +647,7 @@ document.getElementById("edit-time-tbd")
   });
 
 document.getElementById("show-new-game")
-  .addEventListener("click", function () {
+ .addEventListener("click", async function () {
     const form = document.getElementById("new-game-form");
 
     form.hidden = !form.hidden;
@@ -841,7 +841,35 @@ document.getElementById("delete-game")
 
     if (!confirmed) return;
 
-    alert("Confirmation works! No game was deleted.");
+   
+const deleteButton = document.getElementById("delete-game");
+deleteButton.disabled = true;
+
+try {
+  const { data, error } = await db
+    .from("games")
+    .delete()
+    .eq("id", gameId)
+    .select("id");
+
+  if (error) throw error;
+
+  if (!data || data.length !== 1) {
+    throw new Error("Game was not deleted. Please check your permissions.");
+  }
+
+  alert("Game deleted successfully!");
+
+  document.getElementById("game-details").hidden = true;
+  await loadScheduleGames();
+
+} catch (error) {
+  console.error("Delete failed:", error);
+  alert("Could not delete game: " + error.message);
+} finally {
+  deleteButton.disabled = false;
+}
+
   });
 
     checkScheduleAccess();
