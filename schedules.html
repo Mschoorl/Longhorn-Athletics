@@ -341,11 +341,38 @@
       const { data: isAdmin, error: roleError } =
         await db.rpc("is_super_admin");
 
-      if (roleError || isAdmin !== true) {
-        status.textContent =
-          "Access denied. Athletic Director permission required.";
-        return;
-      }
+    
+if (roleError) {
+  status.textContent =
+    "Unable to verify permissions: " + roleError.message;
+  return;
+}
+
+if (isAdmin !== true) {
+  const { data: assignments, error: assignmentError } = await db
+    .from("coach_assignments")
+    .select("team_id")
+    .eq("user_id", user.id);
+
+  if (assignmentError || !assignments || assignments.length === 0) {
+    status.textContent =
+      "Access denied. You must be an approved coach assigned to a team.";
+    return;
+  }
+
+  const { data: coachRole, error: coachRoleError } = await db
+    .from("staff_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "coach")
+    .maybeSingle();
+
+  if (coachRoleError || !coachRole) {
+    status.textContent =
+      "Access denied. Approved coach status required.";
+    return;
+  }
+}
 
       status.textContent =
         "Access verified! Welcome to Schedule Management.";
