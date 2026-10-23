@@ -592,14 +592,15 @@ const gameDateUTC = nevadaGameDateToUTC(
   timeTBD ? "12:00" : time
 );
 
-const { data, error } = await db
-  .from("games")
-  .update({
-    opponent: opponent,
-    location: location || null,
-    game_date: gameDateUTC,
-    time_tbd: timeTBD
-  })
+
+.update({
+  opponent: opponent,
+  location: location || null,
+  game_date: gameDateUTC,
+  time_tbd: timeTBD,
+  home_away: document.getElementById("edit-home-away").value
+})
+
 
       .eq("id", gameId)
       .select("id,opponent,location")
