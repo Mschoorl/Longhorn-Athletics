@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coach Dashboard | Longhorn Athletics</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f3;
+      color: #12382b;
+    }
+    header {
+      background: #075333;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-bottom: 5px solid #efb72e;
+    }
+    main {
+      max-width: 1000px;
+      margin: 35px auto;
+      padding: 0 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      border-top: 5px solid #efb72e;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    .button {
+      display: inline-block;
+      background: #075333;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 7px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .team {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Longhorn Athletics</h1>
+  <p>Coach Dashboard</p>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Welcome, Coach!</h2>
+    <p id="status">Checking coach access...</p>
+    <button id="sign-out" class="button">Sign Out</button>
+  </div>
+
+  <div id="coach-content" hidden>
+    <div class="card">
+      <h2>My Assigned Teams</h2>
+      <div id="team-list">Loading teams...</div>
+    </div>
+
+    <div class="card">
+      <h2>Coaching Tools</h2>
+      <p>Manage schedules for your assigned teams.</p>
+      <p>Schedule management access is being configured.</p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL =
+    "https://zwbjethanfvgqknngcii.supabase.co";
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_k7rAGIWYj_t_BmDfbwp42w_Yj375UCa";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  async function checkCoachAccess() {
+    const status = document.getElementById("status");
+
+    const { data: { user }, error: authError } =
+      await db.auth.getUser();
+
+    if (authError || !user) {
+      window.location.replace("login.html");
+      return;
+    }
+
+    const { data: role, error: roleError } = await db
+      .from("staff_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "coach")
+      .maybeSingle();
+
+    if (roleError || !role) {
+      status.textContent = "Access denied. Approved coaches only.";
+      return;
+    }
+
+    status.textContent = "Coach access verified.";
+    document.getElementById("coach-content").hidden = false;
+
+    const { data: assignments, error } = await db
+      .from("coach_assignments")
+      .select("team_id, teams(name, level, sports(name))")
+      .eq("user_id", user.id);
+
+    const teamList = document.getElementById("team-list");
+
+    if (error) {
+      teamList.textContent = "Could not load teams: " + error.message;
+      return;
+    }
+
+    if (!assignments || assignments.length === 0) {
+      teamList.textContent = "No teams assigned yet.";
+      return;
+    }
+
+    teamList.replaceChildren();
+
+    for (const assignment of assignments) {
+      const team = assignment.teams;
+      const sport = team?.sports?.name || team?.name || "Team";
+      const level = team?.level || "";
+
+      const div = document.createElement("div");
+      div.className = "team";
+      div.textContent = sport + (level ? " — " + level : "");
+      teamList.appendChild(div);
+    }
+  }
+
+  document.getElementById("sign-out")
+    .addEventListener("click", async () => {
+      await db.auth.signOut();
+      window.location.replace("login.html");
+    });
+
+  checkCoachAccess();
+</script>
+
+</body>
+</html>
