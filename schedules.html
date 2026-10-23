@@ -717,8 +717,33 @@ async function loadNewGameTeams() {
     return nameA.localeCompare(nameB) ||
       (a.level || "").localeCompare(b.level || "");
   });
+const { data: { user } } = await db.auth.getUser();
 
-  for (const team of teams) {
+const { data: isAdmin } = await db.rpc("is_super_admin");
+
+let allowedTeamIds = null;
+
+if (isAdmin !== true) {
+  const { data: assignments, error: assignmentError } = await db
+    .from("coach_assignments")
+    .select("team_id")
+    .eq("user_id", user.id);
+
+  if (assignmentError) {
+    message.textContent =
+      "Could not load coach assignments: " + assignmentError.message;
+    return;
+  }
+
+  allowedTeamIds = new Set(
+    assignments.map(assignment => String(assignment.team_id))
+  );
+}
+ for (const team of teams) {
+  if (allowedTeamIds !== null &&
+      !allowedTeamIds.has(String(team.id))) {
+    continue;
+  }
     const option = document.createElement("option");
 
     option.value = team.id;
