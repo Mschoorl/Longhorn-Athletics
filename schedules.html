@@ -350,11 +350,10 @@ if (roleError) {
 }
 currentUserIsAdmin = (isAdmin === true);
 if (isAdmin !== true) {
-  const { data: assignments, error: assignmentError } = await db
-    .from("coach_assignments")
-    .select("team_id")
-    .eq("user_id", user.id);
-
+const { data: assignments, error: assignmentError } = await db
+  .from("coach_assignments")
+  .select("team_id, teams(sport_id)")
+  .eq("user_id", user.id);
   if (assignmentError || !assignments || assignments.length === 0) {
     status.textContent =
       "Access denied. You must be an approved coach assigned to a team.";
@@ -372,9 +371,9 @@ if (isAdmin !== true) {
     status.textContent =
       "Access denied. Approved coach status required.";
     return;
-  }currentCoachTeamIds = assignments.map(
-  assignment => String(assignment.team_id)
-);
+ currentCoachTeamIds = assignments
+  .map(assignment => String(assignment.teams?.sport_id))
+  .filter(sportId => sportId !== "undefined" && sportId !== "null");
 }
 
       status.textContent =
@@ -438,10 +437,9 @@ const filteredGames = games.filter(game => {
     !selectedLevel ||
     game.teams?.level === selectedLevel;
 
- const matchesAssignedTeam =
+const matchesAssignedTeam =
   currentUserIsAdmin ||
-  currentCoachTeamIds.includes(String(game.team_id));
-
+  currentCoachTeamIds.includes(String(game.teams?.sports?.id));
 return matchesSport && matchesLevel && matchesAssignedTeam;
 });
 
@@ -707,7 +705,7 @@ async function loadNewGameTeams() {
       id,
       name,
       level,
-      sports (name)
+   sports (id, name)
     `)
     .order("name", { ascending: true });
 
@@ -747,6 +745,12 @@ if (isAdmin !== true) {
   );
 }
  for (const team of teams) {
+   if (
+  !currentUserIsAdmin &&
+  !currentCoachTeamIds.includes(String(team.sports?.id))
+) {
+  continue;
+}
   if (allowedTeamIds !== null &&
       !allowedTeamIds.has(String(team.id))) {
     continue;
