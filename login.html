@@ -212,10 +212,11 @@
       "Login worked, but your staff role could not be verified.";
   } else if (roleData.role === "super_admin") {
     window.location.replace("admin.html");
-  } else {
-    message.textContent =
-      "Login worked. Your coach dashboard is not ready yet.";
-  }
+} else if (roleData.role === "coach") {
+  window.location.replace("coach-dashboard.html");
+} else {
+  message.textContent = "Your account does not have staff access.";
+}
 }
 
 
