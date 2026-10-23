@@ -593,6 +593,9 @@ const gameDateUTC = nevadaGameDateToUTC(
 );
 
 
+const { data, error } = await db
+  .from("games")
+
 .update({
   opponent: opponent,
   location: location || null,
