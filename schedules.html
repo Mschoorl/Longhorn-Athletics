@@ -372,7 +372,9 @@ if (isAdmin !== true) {
     status.textContent =
       "Access denied. Approved coach status required.";
     return;
-  }
+  }currentCoachTeamIds = assignments.map(
+  assignment => String(assignment.team_id)
+);
 }
 
       status.textContent =
