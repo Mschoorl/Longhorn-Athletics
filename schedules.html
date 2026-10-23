@@ -435,7 +435,9 @@ async function showSelectedGame() {
 
   const { data: game, error } = await db
     .from("games")
-    .select("id,opponent,game_date,location,time_tbd")
+  
+.select("id,opponent,game_date,location,time_tbd,home_away")
+
     .eq("id", gameId)
     .single();
 
