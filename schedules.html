@@ -348,7 +348,7 @@ if (roleError) {
     "Unable to verify permissions: " + roleError.message;
   return;
 }
-
+currentUserIsAdmin = (isAdmin === true);
 if (isAdmin !== true) {
   const { data: assignments, error: assignmentError } = await db
     .from("coach_assignments")
