@@ -397,10 +397,10 @@ async function loadScheduleGames() {
     '<option value="">Choose a game...</option>';
 
   const { data: games, error } = await db
-    .from("games")
-  
+.from("games")
 .select(`
   id,
+  team_id,
   game_date,
   opponent,
   home_away,
@@ -438,7 +438,11 @@ const filteredGames = games.filter(game => {
     !selectedLevel ||
     game.teams?.level === selectedLevel;
 
-  return matchesSport && matchesLevel;
+ const matchesAssignedTeam =
+  currentUserIsAdmin ||
+  currentCoachTeamIds.includes(String(game.team_id));
+
+return matchesSport && matchesLevel && matchesAssignedTeam;
 });
 
 for (const game of filteredGames) {
