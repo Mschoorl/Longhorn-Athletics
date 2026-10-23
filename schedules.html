@@ -379,6 +379,9 @@ if (isAdmin !== true) {
       
 document.getElementById("schedule-form").hidden = false;
       document.getElementById("new-game-section").hidden = false;
+      
+document.getElementById("delete-game").hidden = (isAdmin !== true);
+
 await loadScheduleGames();
       await loadNewGameTeams();
       await loadSportFilter();
